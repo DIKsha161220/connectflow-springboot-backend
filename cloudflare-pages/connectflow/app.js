@@ -74,6 +74,48 @@ const state = {
   // DEMO ONLY: all contact names, phone numbers, addresses and activity below are illustrative.
   customers: [
     {
+        "id": 80,
+        "name": "infosys private limited",
+        "phone": "",
+        "company": "infosys private limited",
+        "contacts": "interested in todays prasentation | Contact: sunil patil 9876543210",
+        "street": "presentation class",
+        "village": "shivajinagr",
+        "taluka": "haveli",
+        "district": "pune",
+        "state": "Maharashtra",
+        "pin": "411001",
+        "referenceBy": "amit patil",
+        "referenceFrom": "Existing Institute",
+        "branchCount": "1",
+        "priority": "High",
+        "owner": "Amit Patil",
+        "status": "New",
+        "followupDate": "2026-12-12T11:28",
+        "notes": "interested in todays prasentation | Contact: sunil patil 9876543210"
+    },
+    {
+        "id": 79,
+        "name": "infosys private limited",
+        "phone": "",
+        "company": "infosys private limited",
+        "contacts": "interested in todays prasentation | Contact: sunil patil 9876543210",
+        "street": "presentation class",
+        "village": "shivajinagr",
+        "taluka": "haveli",
+        "district": "pune",
+        "state": "Maharashtra",
+        "pin": "411001",
+        "referenceBy": "amit patil",
+        "referenceFrom": "Existing Institute",
+        "branchCount": "1",
+        "priority": "High",
+        "owner": "Amit Patil",
+        "status": "New",
+        "followupDate": "2026-12-12T11:28",
+        "notes": "interested in todays prasentation | Contact: sunil patil 9876543210"
+    },
+    {
         "id": 78,
         "name": "aadvik tech private limited",
         "phone": "",
@@ -137,7 +179,7 @@ const state = {
         "notes": "Interested in demo session | Contact: Sunil Patil 9876543210"
     },
     {
-        "id": 74,
+        "id": 75,
         "name": "purnmalll lahoti clg od enginnering",
         "phone": "",
         "company": "purnmalll lahoti clg od enginnering",
@@ -158,7 +200,7 @@ const state = {
         "notes": "intereted in demo class | Contact: sunil patil 98"
     },
     {
-        "id": 75,
+        "id": 74,
         "name": "purnmalll lahoti clg od enginnering",
         "phone": "",
         "company": "purnmalll lahoti clg od enginnering",
@@ -225,7 +267,7 @@ const state = {
         "name": "M.B.E.Society Clg of Enginnering",
         "phone": "",
         "company": "M.B.E.Society Clg of Enginnering",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "demo for class",
         "village": "shivajinagar",
         "taluka": "haveli",
@@ -235,7 +277,7 @@ const state = {
         "referenceBy": "amit patil",
         "referenceFrom": "Employee",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -246,7 +288,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -267,7 +309,7 @@ const state = {
         "name": "Saraswati Vidya Mandir & Junior College",
         "phone": "",
         "company": "Saraswati Vidya Mandir & Junior College",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "Plot No 12, Paud Road",
         "village": "Kothrud",
         "taluka": "Haveli",
@@ -277,7 +319,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Employee",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -298,7 +340,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -309,7 +351,7 @@ const state = {
         "name": "Indira College of Engineering",
         "phone": "",
         "company": "Indira College of Engineering",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -319,7 +361,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -330,7 +372,7 @@ const state = {
         "name": "JSPM Rajarshi Shahu College",
         "phone": "",
         "company": "JSPM Rajarshi Shahu College",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -340,7 +382,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -351,7 +393,7 @@ const state = {
         "name": "AISSMS College of Engineering",
         "phone": "",
         "company": "AISSMS College of Engineering",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -361,7 +403,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -372,7 +414,7 @@ const state = {
         "name": "Cummins College of Engineering",
         "phone": "",
         "company": "Cummins College of Engineering",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -382,7 +424,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -393,7 +435,7 @@ const state = {
         "name": "Pimpri Chinchwad College of Engg",
         "phone": "",
         "company": "Pimpri Chinchwad College of Engg",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -403,7 +445,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -414,7 +456,7 @@ const state = {
         "name": "Sinhgad College of Engineering",
         "phone": "",
         "company": "Sinhgad College of Engineering",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -424,7 +466,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -435,7 +477,7 @@ const state = {
         "name": "Bharati Vidyapeeth Deemed University",
         "phone": "",
         "company": "Bharati Vidyapeeth Deemed University",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -445,7 +487,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -456,7 +498,7 @@ const state = {
         "name": "Vishwakarma Institute of Technology",
         "phone": "",
         "company": "Vishwakarma Institute of Technology",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -466,7 +508,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -477,7 +519,7 @@ const state = {
         "name": "MIT World Peace University",
         "phone": "",
         "company": "MIT World Peace University",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -487,7 +529,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -498,7 +540,7 @@ const state = {
         "name": "COEP Technological University",
         "phone": "",
         "company": "COEP Technological University",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -508,7 +550,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -519,7 +561,7 @@ const state = {
         "name": "Shree Ganesh Multistate Credit Co-Op",
         "phone": "",
         "company": "Shree Ganesh Multistate Credit Co-Op",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -529,7 +571,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -540,7 +582,7 @@ const state = {
         "name": "Modern College of Engineering, Pune",
         "phone": "",
         "company": "Modern College of Engineering, Pune",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -550,7 +592,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -571,7 +613,7 @@ const state = {
         "referenceBy": "amit patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "Contacted",
         "followupDate": "2026-11-22T01:38",
@@ -582,7 +624,7 @@ const state = {
         "name": "new modern school",
         "phone": "",
         "company": "new modern school",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "tps colonye",
         "village": "shivajinagar",
         "taluka": "haveli",
@@ -592,7 +634,7 @@ const state = {
         "referenceBy": "amit patil",
         "referenceFrom": "Employee",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -603,7 +645,7 @@ const state = {
         "name": "shree ganesh school",
         "phone": "",
         "company": "shree ganesh school",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "parli",
         "village": "parli",
         "taluka": "",
@@ -613,7 +655,7 @@ const state = {
         "referenceBy": "amit patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "Contacted",
         "followupDate": "2026-11-22T11:00",
@@ -624,7 +666,7 @@ const state = {
         "name": "xyz.xyz.xyz",
         "phone": "",
         "company": "xyz.xyz.xyz",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "mnl, abc, exg",
         "village": "",
         "taluka": "",
@@ -634,7 +676,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Existing Institute",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "2026-11-23T08:34",
@@ -645,7 +687,7 @@ const state = {
         "name": "xyz.xyz.xys",
         "phone": "",
         "company": "xyz.xyz.xys",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "abc",
         "village": "abs",
         "taluka": "haveli",
@@ -655,7 +697,7 @@ const state = {
         "referenceBy": "amit patil",
         "referenceFrom": "Employee",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -676,7 +718,7 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Employee",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -687,7 +729,7 @@ const state = {
         "name": "Modern College Pune",
         "phone": "",
         "company": "Modern College Pune",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "FC Road",
         "village": "shivajinagar",
         "taluka": "haveli",
@@ -697,7 +739,7 @@ const state = {
         "referenceBy": "amit patil",
         "referenceFrom": "Employee",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
@@ -708,7 +750,7 @@ const state = {
         "name": "Saraswati Vidya Mandir & Junior College",
         "phone": "",
         "company": "Saraswati Vidya Mandir & Junior College",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "Plot No 12, Paud Road",
         "village": "Kothrud",
         "taluka": "Haveli",
@@ -718,39 +760,18 @@ const state = {
         "referenceBy": "Amit Patil",
         "referenceFrom": "Employee",
         "branchCount": "1",
-        "priority": "Medium",
+        "priority": "High",
         "owner": "Amit Patil",
         "status": "New",
         "followupDate": "",
         "notes": ""
     },
     {
-        "id": 1,
-        "name": "Demo Institute Updated",
-        "phone": "",
-        "company": "Demo Institute Updated",
-        "contacts": "No contacts",
-        "street": "Sample Road 123",
-        "village": "Test Village",
-        "taluka": "Test Taluka",
-        "district": "Pune",
-        "state": "Maharashtra",
-        "pin": "411005",
-        "referenceBy": "Amit Patil",
-        "referenceFrom": "Employee",
-        "branchCount": "5",
-        "priority": "Medium",
-        "owner": "Amit Patil",
-        "status": "Interested",
-        "followupDate": "",
-        "notes": "Updated from Postman"
-    },
-    {
         "id": 47,
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -771,7 +792,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -792,7 +813,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -813,7 +834,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -834,7 +855,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -855,7 +876,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -876,7 +897,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -897,7 +918,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -918,7 +939,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -939,7 +960,7 @@ const state = {
         "name": "Test Institute",
         "phone": "",
         "company": "Test Institute",
-        "contacts": "No contacts",
+        "contacts": "Sunil Patil | Principal | 9876543210",
         "street": "",
         "village": "",
         "taluka": "",
@@ -954,6 +975,27 @@ const state = {
         "status": "New",
         "followupDate": "",
         "notes": ""
+    },
+    {
+        "id": 1,
+        "name": "Demo Institute Updated",
+        "phone": "",
+        "company": "Demo Institute Updated",
+        "contacts": "Sunil Patil | Principal | 9876543210",
+        "street": "Sample Road 123",
+        "village": "Test Village",
+        "taluka": "Test Taluka",
+        "district": "Pune",
+        "state": "Maharashtra",
+        "pin": "411005",
+        "referenceBy": "Amit Patil",
+        "referenceFrom": "Employee",
+        "branchCount": "5",
+        "priority": "High",
+        "owner": "Amit Patil",
+        "status": "Interested",
+        "followupDate": "",
+        "notes": "Updated from Postman"
     }
 ],
   calls: [
@@ -969,52 +1011,68 @@ const state = {
   ],
   followups: [
     {
-        "id": 93,
-        "customer": "aadvik tech private limited",
-        "date": "2026-11-23T04:14",
+        "id": 80001,
+        "customer": "infosys private limited",
+        "date": "2026-12-12T11:28",
         "owner": "Amit Patil",
         "status": "Upcoming",
-        "notes": "Follow-up scheduled: aadvik tech private limited demo session"
+        "notes": "interested in todays prasentation | Contact: sunil patil 9876543210"
     },
     {
-        "id": 92,
+        "id": 78001,
+        "customer": "aadvik tech private limited",
+        "date": "2026-11-22T22:44",
+        "owner": "Amit Patil",
+        "status": "Upcoming",
+        "notes": "interested in company demo session | Contact: sunil patil 9876543210"
+    },
+    {
+        "id": 76001,
         "customer": "DY.PATIL CLG ENGINNERING",
         "date": "2026-11-23T03:59",
         "owner": "Amit Patil",
         "status": "Upcoming",
-        "notes": "Follow-up discussion for software demo with DY.PATIL CLG ENGINNERING"
+        "notes": "Interested in demo session | Contact: Sunil Patil 9876543210"
     },
     {
-        "id": 85,
+        "id": 75001,
         "customer": "purnmalll lahoti clg od enginnering",
-        "date": "2026-11-23T12:00",
+        "date": "2026-11-23T06:30",
         "owner": "Amit Patil",
         "status": "Upcoming",
-        "notes": "Follow-up after institute registration"
+        "notes": "intereted in demo class | Contact: sunil patil 98"
     },
     {
-        "id": 84,
+        "id": 73001,
         "customer": "puranmal lahoti govern clg",
         "date": "2026-11-23T05:58",
         "owner": "Amit Patil",
         "status": "Upcoming",
-        "notes": "Follow-up scheduled"
+        "notes": "interested in demo | Contact: sunil patil 9876543210"
     },
     {
-        "id": 301,
-        "customer": "Modern College Pune",
-        "date": "2026-11-23T10:00",
+        "id": 55001,
+        "customer": "NEW HIGH CLG",
+        "date": "2026-11-22T01:38",
         "owner": "Amit Patil",
         "status": "Upcoming",
-        "notes": "Product demonstration"
+        "notes": "interested in visiting school | Contact: SUNIL PATIL 9876543210"
     },
     {
-        "id": 302,
-        "customer": "Shree Ganesh Co Op Credit Society Ltd.",
-        "date": "2026-11-24T11:30",
+        "id": 53001,
+        "customer": "shree ganesh school",
+        "date": "2026-11-22T11:00",
         "owner": "Amit Patil",
         "status": "Upcoming",
-        "notes": "Pricing and proposal discussion"
+        "notes": "parli, parli, beed \u2022 Lead: Contacted \u2022 Assigned: Amit Patil"
+    },
+    {
+        "id": 52001,
+        "customer": "xyz.xyz.xyz",
+        "date": "2026-11-23T08:34",
+        "owner": "Amit Patil",
+        "status": "Upcoming",
+        "notes": "mnl, abc, exg | Lead: New"
     }
 ],
   nextId: 400
@@ -1229,7 +1287,18 @@ function renderDashboard() {
   $("stat-calls").textContent=state.calls.filter(c=>visibleNames().has(c.customer)).length;
   $("stat-visits").textContent=state.visits.filter(v=>visibleNames().has(v.customer)).length;
   $("stat-followups").textContent=state.followups.filter(f=>f.status!=="Completed").length;
-  const pending=state.followups.filter(f=>visibleNames().has(f.customer)&&f.status!=="Completed").slice(0,4);
+  const seenCust = new Set();
+  const uniquePending = [];
+  for (const f of state.followups) {
+    if (visibleNames().has(f.customer) && f.status !== "Completed") {
+      const key = (f.customer || "").trim().toLowerCase();
+      if (!seenCust.has(key)) {
+        seenCust.add(key);
+        uniquePending.push(f);
+      }
+    }
+  }
+  const pending = uniquePending.slice(0, 5);
   $("dashboard-followups").innerHTML=pending.map(f=>`<div class="activity-row"><div class="mini-avatar">${escapeHtml(initials(f.customer))}</div><div class="activity-main"><button class="institute-link" data-open-institute="${escapeHtml(f.customer)}">${escapeHtml(f.customer)}</button><small>${escapeHtml(formatDateTime(f.date))} · ${escapeHtml(f.owner)}</small></div><div class="activity-side">${badge(f.status)}</div></div>`).join("")||`<div class="empty-state">All follow-ups completed.</div>`;
   $("dashboard-calls").innerHTML=state.calls.filter(c=>visibleNames().has(c.customer)).slice(0,4).map(c=>`<div class="activity-row"><div class="mini-avatar">☎</div><div class="activity-main"><button class="institute-link" data-open-institute="${escapeHtml(c.customer)}">${escapeHtml(c.customer)}</button><small>${escapeHtml(c.date)} · ${escapeHtml(c.type)}</small></div><div class="activity-side">${badge(c.result)}</div></div>`).join("")||`<div class="empty-state">No calls logged yet.</div>`;
 }
@@ -1468,8 +1537,12 @@ async function loadLiveDatabaseData() {
         state.customers = merged;
 
         // Auto-sync follow-ups from live institute records that have nextFollowUpAt
-        liveCustomers.forEach(inst => {
-          if (inst.followupDate) {
+        const instituteFollowups = [];
+        const seenInstFollowups = new Set();
+        for (const inst of liveCustomers) {
+          const key = (inst.name || "").trim().toLowerCase();
+          if (inst.followupDate && !seenInstFollowups.has(key)) {
+            seenInstFollowups.add(key);
             const fDate = new Date(inst.followupDate);
             const today = new Date();
             let fStatus = "Upcoming";
@@ -1478,23 +1551,17 @@ async function loadLiveDatabaseData() {
             } else if (fDate < today) {
               fStatus = "Overdue";
             }
-            const existingIdx = state.followups.findIndex(f => (f.customer || '').toLowerCase() === inst.name.toLowerCase());
-            const fObj = {
-              id: inst.id * 1000 + 1,
+            instituteFollowups.push({
+              id: (inst.id || 1) * 1000 + 1,
               customer: inst.name,
               date: inst.followupDate.slice(0, 16),
               owner: inst.owner || "Amit Patil",
               status: fStatus,
               notes: inst.notes || "Scheduled follow-up"
-            };
-            if (existingIdx !== -1) {
-              state.followups[existingIdx] = fObj;
-            } else {
-              state.followups.unshift(fObj);
-            }
+            });
           }
-        });
-
+        }
+        state.followups = [...instituteFollowups, ...state.followups.filter(f => !seenInstFollowups.has((f.customer || "").trim().toLowerCase()))];
         // Also fetch from backend /api/follow-ups
         try {
           const fRes = await fetch(`${BACKEND_URL}/follow-ups`);
