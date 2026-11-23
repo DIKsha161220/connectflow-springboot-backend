@@ -1,0 +1,24 @@
+CONNECTFLOW CRM - QUICK RUN INSTRUCTIONS
+========================================
+
+1. WINDOWS PC RUN:
+   - Double-click "ConnectFlow-CRM.bat" to start immediately.
+   - OR double-click "index.html" to open in Chrome/Edge.
+
+2. INSTALL AS DESKTOP APP:
+   - Open index.html in Google Chrome.
+   - Click the "Install ConnectFlow CRM" icon in the address bar.
+   - Now ConnectFlow CRM runs as a dedicated standalone desktop app!
+
+3. BUILD ANDROID APK:
+   - Open Android Studio.
+   - Click "Open" and select the "android" folder in this directory.
+   - Go to: Build -> Build Bundle(s) / APK(s) -> Build APK(s).
+   - Once built, click "locate" to get your APK file!
+
+4. DEFAULT LOGINS:
+   - Admin:   amit.patil@example.com     (Password: root)
+   - Calling: sneha.deshmukh@example.com (Password: root)
+   - Or click "Create Account" tab on the login screen to register a new user.
+
+All data persists safely on your machine!

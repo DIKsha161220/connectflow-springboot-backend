@@ -1,0 +1,71 @@
+========================================================================
+CONNECTFLOW CRM - 7-STEP STANDALONE .EXE DESKTOP CONVERSION GUIDE
+========================================================================
+
+Dear User / Sir,
+
+Here is the exact implementation of the 7-Step architecture requested for
+converting ConnectFlow CRM into a standalone offline desktop installer (.exe)
+with strict multi-user data privacy and isolated accounts.
+
+------------------------------------------------------------------------
+STEP-BY-STEP BREAKDOWN:
+------------------------------------------------------------------------
+
+Step 1: Build Your Backend File
+• Spring Boot backend configured via Maven (pom.xml).
+• Running 'mvn clean package -DskipTests' generates the standalone JAR:
+  target/connectflow-backend-1.0.0.jar.
+
+Step 2: Generate a Portable Java Folder
+• Standalone Java runtime script created: 'Create-Portable-Java.bat'.
+• Executes Java 'jlink' tool with stripped modules:
+  jlink --add-modules java.base,java.desktop,java.logging,java.management,java.naming,java.net.http,java.security.jgss,java.sql,jdk.unsupported --output jre-min --strip-debug --compress=2
+• Results in a lightweight, self-contained 'jre-min' folder so clients don't need Java pre-installed.
+
+Step 3: Check Your Local Links, Data Isolation & CORS
+• Frontend endpoints point to http://localhost:8080.
+• Spring Boot SecurityConfig updated with full wildcard CORS support (CorsConfigurationSource).
+• STRICT MULTI-USER DATA ISOLATION IMPLEMENTED:
+  - Every created lead/record is tagged with owner: currentUser.email.
+  - User A only sees User A's records, recordings, and CSV exports.
+  - User B only sees User B's records, recordings, and CSV exports.
+  - Neither can view the other's confidential data.
+  - Administrative accounts can toggle team-wide oversight.
+
+Step 4: Install Electron & Bundler
+• 'package.json' configured with dependencies:
+  - electron
+  - electron-builder
+  - wait-on
+
+Step 5: Add One Startup File (main.js)
+• Created 'main.js' in the root directory:
+  - Launches Spring Boot JAR via bundled JRE (jre-min) in the background.
+  - Probes http://localhost:8080 until the backend is fully initialized.
+  - Opens the Electron native BrowserWindow (1366x850).
+  - Automatically kills the background backend process upon app exit so no ghost processes remain.
+
+Step 6: Point package.json to Your Existing Paths
+• Configured 'build.extraResources' in package.json:
+  - from: "target/connectflow-backend-1.0.0.jar", to: "connectflow-backend-1.0.0.jar"
+  - from: "jre-min", to: "jre-min"
+• Target: Portable .exe and NSIS Setup installer.
+
+Step 7: Build the Desktop App
+• Run 'Build-Desktop-EXE.bat' (or 'npm run dist') to package the application.
+• Output: Final standalone installer located in the 'dist/' folder!
+• Instant Fallback: 'Build-EXE.bat' (compiles native Windows C# ConnectFlow-CRM.exe via built-in csc.exe).
+
+========================================================================
+TESTING MULTI-USER DATA PRIVACY (DEMO INSTRUCTIONS):
+========================================================================
+1. Open http://localhost:8080 or launch the app.
+2. Sign in as Diksha Rode (diksha.rode@connectflow.local / 123456).
+   - Add a new contact (e.g., "Ramesh Patil").
+   - Notice it is tagged under Diksha Rode.
+3. Click "Logout" in top right corner.
+4. Sign in as Amit Sharma (amit.sharma@connectflow.local / 123456).
+   - Notice that Ramesh Patil is NOT visible to Amit! Amit only sees his own records.
+   - Any Excel CSV export downloaded by Amit only contains Amit's records.
+========================================================================

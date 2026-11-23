@@ -1,0 +1,64 @@
+{
+  "name": "connectflow-crm-desktop",
+  "version": "1.0.0",
+  "description": "ConnectFlow CRM Standalone Desktop Application with Strict Data Isolation",
+  "main": "main.js",
+  "author": "ConnectFlow Team",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "dependencies": {
+    "wait-on": "^7.2.0"
+  },
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.connectflow.crm",
+    "productName": "ConnectFlow CRM",
+    "copyright": "Copyright © 2026 ConnectFlow",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "ConnectFlow-Desktop.html",
+      "src/main/resources/static/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "target/connectflow-backend-1.0.0.jar",
+        "to": "connectflow-backend-1.0.0.jar",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "jre-min",
+        "to": "jre-min",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ConnectFlow CRM"
+    }
+  }
+}

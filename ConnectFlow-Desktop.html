@@ -1,0 +1,4110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConnectFlow CRM - Standalone Desktop System</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #2563eb;
+            --sidebar-text: #94a3b8;
+            --sidebar-text-active: #ffffff;
+            --bg-canvas: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --success-light: #ecfdf5;
+            --warning: #f59e0b;
+            --warning-light: #fffbeb;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --purple: #8b5cf6;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        input, select, textarea, button {
+            font-family: inherit;
+        }
+
+        /* Windows 11 Desktop Titlebar */
+        .window-titlebar {
+            background: #090d16;
+            color: #cbd5e1;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 100;
+        }
+
+        .titlebar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .titlebar-logo-icon {
+            width: 20px;
+            height: 20px;
+            background: #2563eb;
+            color: #ffffff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 11px;
+        }
+
+        .offline-status-pill {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .offline-status-pill.connected {
+            background: rgba(16, 185, 129, 0.18) !important;
+            color: #10b981 !important;
+            border-color: rgba(16, 185, 129, 0.45) !important;
+        }
+
+        .offline-status-pill.offline {
+            background: rgba(245, 158, 11, 0.15) !important;
+            color: #f59e0b !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+        }
+
+        .offline-status-pill.offline .status-dot-pulse {
+            background: #f59e0b !important;
+            box-shadow: 0 0 8px #f59e0b !important;
+        }
+
+        .status-dot-pulse {
+            width: 7px;
+            height: 7px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .window-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .win-btn {
+            width: 32px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.15s;
+        }
+        .win-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        .win-btn.close:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+
+                                /* Zero-overflow App Layout Container */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden !important;
+            background: #f8fafc;
+        }
+
+        .window-titlebar {
+            background: #090d16;
+            color: #cbd5e1;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+
+        .app-container {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100% !important;
+            height: calc(100vh - 38px) !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+
+        /* Left Side Black/Dark Navy Plate Sidebar */
+        .sidebar {
+            width: 240px !important;
+            min-width: 240px !important;
+            max-width: 240px !important;
+            flex-shrink: 0 !important;
+            background: #0f172a !important;
+            color: #94a3b8 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            border-right: 1px solid rgba(255,255,255,0.08) !important;
+            height: 100% !important;
+            position: relative !important;
+            left: 0 !important;
+            top: 0 !important;
+            z-index: 500 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            user-select: none !important;
+        }
+
+        .sidebar-brand {
+            padding: 18px 18px 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 19px;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+            flex-shrink: 0;
+        }
+
+        .brand-text h2 {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+
+        .brand-text span {
+            color: #64748b;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            display: block;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-section-title {
+            color: #475569;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 6px 12px 4px 12px;
+            font-weight: 700;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+
+        .nav-item-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            color: #64748b;
+            flex-shrink: 0;
+        }
+
+        .nav-item:hover {
+            background: #1e293b;
+            color: #ffffff;
+        }
+        .nav-item:hover svg {
+            color: #ffffff;
+        }
+
+        .nav-item.active {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+        }
+        .nav-item.active svg {
+            color: #ffffff !important;
+        }
+
+        .nav-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 12px;
+        }
+
+        .sidebar-footer {
+            padding: 14px 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.25);
+            flex-shrink: 0;
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: #3b82f6;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .user-info h4 {
+            color: #f8fafc;
+            font-size: 12.5px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-info p {
+            color: #64748b;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .logout-quick-btn {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        .logout-quick-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* Right Side White Workspace */
+        .main-workspace {
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+            max-width: calc(100% - 240px) !important;
+            height: 100% !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            background: #f8fafc !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .breadcrumb-link {
+            cursor: pointer;
+            color: #2563eb;
+            font-weight: 600;
+            transition: color 0.15s;
+        }
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+
+        
+        .btn-back-nav:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+
+        /* Top Header Bar */
+        .workspace-header {
+            background: #ffffff;
+            height: 56px;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-nav span.active {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-date-badge {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .btn-header-log {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            color: #334155;
+            padding: 6px 12px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-header-log:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-header-logout {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #dc2626;
+            padding: 6px 14px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-header-logout:hover {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        /* Staff Notice Banner */
+        .workspace-banner {
+            background: #fffbeb;
+            border-bottom: 1px solid #fde68a;
+            padding: 8px 24px;
+            font-size: 12.5px;
+            color: #92400e;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .workspace-banner strong {
+            background: #fef3c7;
+            padding: 2px 8px;
+            border-radius: 5px;
+            color: #b45309;
+            font-size: 11px;
+            margin-right: 6px;
+            border: 1px solid #fcd34d;
+        }
+
+        /* Workspace Content Body */
+        .workspace-body {
+            padding: 24px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            flex: 1;
+        }
+
+        /* Welcome Section */
+        .dashboard-intro {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dashboard-intro h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+        }
+
+        .dashboard-intro p {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .btn-primary-add {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(37,99,235,0.25);
+            transition: all 0.15s;
+        }
+        .btn-primary-add:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* Row 1: KPI Stats Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.15s, box-shadow 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .kpi-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .kpi-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kpi-icon-wrap.blue { background: #eff6ff; color: #2563eb; }
+        .kpi-icon-wrap.green { background: #ecfdf5; color: #10b981; }
+        .kpi-icon-wrap.purple { background: #f5f3ff; color: #8b5cf6; }
+        .kpi-icon-wrap.amber { background: #fffbeb; color: #f59e0b; }
+
+        .kpi-val-row {
+            margin-top: 14px;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .kpi-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .kpi-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+        }
+
+        .kpi-badge.up { background: #ecfdf5; color: #059669; }
+        .kpi-badge.sub { background: #f1f5f9; color: #64748b; }
+        .kpi-badge.warn { background: #fef2f2; color: #dc2626; }
+
+        .kpi-footer-text {
+            font-size: 11.5px;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        /* Row 2: Analytics & Actions Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.3fr 1.3fr;
+            gap: 18px;
+        }
+
+        .dashboard-box {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .box-title {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .box-subtitle {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .box-pill-select {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* SVG Trend Line Chart */
+        .chart-wrapper {
+            position: relative;
+            flex: 1;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 130px;
+            overflow: visible;
+        }
+
+        .chart-legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 10px;
+            font-size: 11.5px;
+            color: #64748b;
+        }
+
+        .legend-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        /* Donut Ring Visual */
+        .donut-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            flex: 1;
+            padding: 8px 0;
+        }
+
+        .donut-graphic {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .donut-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .donut-center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .donut-total {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+        }
+
+        .donut-sub {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .donut-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .donut-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .donut-row span.label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #475569;
+        }
+
+        .donut-row span.val {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* Quick Action Buttons Grid */
+        .quick-actions-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .quick-act-btn {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+
+        .quick-act-btn:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(37,99,235,0.12);
+        }
+
+        .quick-act-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke-width: 2;
+        }
+
+        .quick-act-btn.blue svg { color: #2563eb; }
+        .quick-act-btn.green svg { color: #10b981; }
+        .quick-act-btn.purple svg { color: #8b5cf6; }
+        .quick-act-btn.amber svg { color: #f59e0b; }
+
+        .quick-act-btn span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        /* Row 3: Bottom Feeds Grid */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 18px;
+        }
+
+        /* Activity Table / Feed */
+        .activity-feed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .activity-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 9px;
+            font-size: 12.5px;
+            transition: background 0.15s;
+        }
+
+        .activity-row:hover {
+            background: #f1f5f9;
+        }
+
+        .act-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .act-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .act-icon.phone { background: #eff6ff; color: #2563eb; }
+        .act-icon.visit { background: #f5f3ff; color: #8b5cf6; }
+        .act-icon.clock { background: #fffbeb; color: #f59e0b; }
+
+        .act-texts h5 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .act-texts p {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .status-pill.completed { background: #ecfdf5; color: #059669; }
+        .status-pill.scheduled { background: #eff6ff; color: #2563eb; }
+        .status-pill.pending { background: #fffbeb; color: #d97706; }
+
+        /* Team Performance */
+        .team-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .team-member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 9px;
+        }
+
+        .team-user-details {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-badge-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .team-texts h5 {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .team-texts p {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .team-counters {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .team-stat-item {
+            text-align: right;
+        }
+
+        .team-stat-item small {
+            display: block;
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        /* ================= AUTHENTICATION MODAL (FULL OVERLAY) ================= */
+        .auth-overlay {
+            position: fixed;
+            top: 38px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            border-radius: 18px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 32px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+            animation: authFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes authFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .auth-brand-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .auth-logo-badge {
+            width: 48px;
+            height: 48px;
+            background: #2563eb;
+            color: #ffffff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+            margin-bottom: 12px;
+        }
+
+        .auth-brand-center h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+        }
+
+        .auth-brand-center p {
+            font-size: 12.5px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        /* Segmented Tab Bar */
+        .auth-segmented-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 7px;
+            transition: all 0.15s ease;
+        }
+
+        .auth-tab-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        /* Logout Banner */
+        .auth-alert-banner {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        /* Form Fields */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            color: #0f172a;
+            transition: all 0.15s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+
+        .btn-auth-submit {
+            padding: 11px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 6px;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+            transition: all 0.15s;
+        }
+
+        .btn-auth-submit:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-auth-submit.green-submit {
+            background: #10b981;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.25);
+        }
+        .btn-auth-submit.green-submit:hover {
+            background: #059669;
+        }
+
+        /* 1-Click Role Fill */
+        .quick-role-section {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .quick-role-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #d97706;
+            letter-spacing: 0.5px;
+            margin-bottom: 9px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .role-btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .role-pill-btn {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+
+        .role-pill-btn:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            color: #1d4ed8;
+        }
+
+        .auth-footer-note {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 16px;
+        }
+
+        /* ================= GENERAL MODALS (Add Institute, Log Call, etc.) ================= */
+        .app-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .app-modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-dialog {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 14px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-dialog.large {
+            max-width: 640px;
+            max-height: 88vh;
+            overflow-y: auto;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-sub-label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-confirm {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-item {
+            background: #0f172a;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toastIn 0.2s ease;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Multi-Tab Navigation Views */
+        .workspace-tab-view {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: viewFade 0.18s ease-in-out;
+        }
+        .workspace-tab-view.active {
+            display: flex;
+        }
+        @keyframes viewFade {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Search & Filter Bar */
+        .search-filter-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: #ffffff;
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+        .search-input-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #64748b;
+        }
+        .search-input-wrap input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            color: var(--text-main);
+            background: transparent;
+        }
+        .search-filter-select {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            font-size: 12.5px;
+            color: #334155;
+            background: #f8fafc;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Data Tables */
+        .data-table-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .data-table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .data-table-header h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .data-table-header p {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .count-pill-badge {
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+        .crm-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        .crm-table th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .crm-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: middle;
+        }
+        .crm-table tr:hover td {
+            background: #f8fafc;
+        }
+        .empty-table-state {
+            padding: 48px 20px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13.5px;
+        }
+
+        /* Follow-up Cards matching Screenshot 4 */
+        .followup-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .followup-metric-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .followup-metric-card .f-val {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 6px;
+        }
+        .followup-metric-card .f-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .followup-item-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.15s;
+        }
+        .followup-item-card:hover {
+            box-shadow: var(--shadow-sm);
+            border-color: #cbd5e1;
+        }
+        .f-left-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .f-clock-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .f-meta-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .f-meta-sub {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        .f-notes-line {
+            font-size: 12.5px;
+            color: #475569;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .f-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .f-btn-action {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .f-btn-action:hover {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #93c5fd;
+        }
+        .f-btn-action.complete:hover {
+            background: #ecfdf5;
+            color: #059669;
+            border-color: #6ee7b7;
+        }
+
+
+        .view-banner-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .view-staff-box {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            color: #854d0e;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .view-staff-box strong {
+            background: #fef9c3;
+            color: #a16207;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 11px;
+            border: 1px solid #fde047;
+        }
+        .sub-header-uppercase {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+        .view-page-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .view-page-title-row h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.4px;
+        }
+        .view-page-sub {
+            font-size: 13.5px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        .footer-disclaimer-note {
+            font-size: 11.5px;
+            color: #94a3b8;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. WINDOWS 11 TITLEBAR -->
+    <div class="window-titlebar">
+        <div class="titlebar-left">
+            <div class="titlebar-logo-icon">C</div>
+            <span>ConnectFlow CRM - Standalone Desktop Application</span>
+            <div class="offline-status-pill offline" id="backendStatusPill" onclick="checkAndSyncBackend(true)" style="cursor: pointer;" title="Click to test connection and sync with PostgreSQL">
+                <span class="status-dot-pulse" id="backendStatusDot"></span>
+                <span id="backendStatusText">Checking PostgreSQL Backend...</span>
+            </div>
+        </div>
+        <div class="window-controls">
+            <button class="win-btn" title="Minimize">&#8212;</button>
+            <button class="win-btn" title="Maximize">&#9634;</button>
+            <button class="win-btn close" title="Close" onclick="confirmExit()">&#10005;</button>
+        </div>
+    </div>
+
+    <!-- 2. MAIN APPLICATION CONTAINER -->
+    <div class="app-container">
+        
+                        <!-- Sidebar Navigation matching localhost:5173 -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">C</div>
+                <div class="brand-text">
+                    <h2>ConnectFlow</h2>
+                    <span>CRM WORKSPACE</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <div class="sidebar-section-title">Workspace</div>
+                <a class="nav-item active" onclick="switchNav('tab-dashboard', this)">
+                    <div class="nav-item-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+                <a class="nav-item" onclick="switchNav('tab-institutes', this)">
+                    <div class="nav-item-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M3 7v14M21 7v14M6 11h2M10 11h2M14 11h2M18 11h2M6 16h2M10 16h2M14 16h2M18 16h2M12 3l9 4H3l9-4z"></path></svg>
+                        <span>Institutes</span>
+                    </div>
+                    <span class="nav-badge" id="sidebarInstCount">14</span>
+                </a>
+                <a class="nav-item" onclick="switchNav('tab-calls', this)">
+                    <div class="nav-item-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"></path></svg>
+                        <span>Call Logs</span>
+                    </div>
+                </a>
+                <a class="nav-item" onclick="switchNav('tab-visits', this)">
+                    <div class="nav-item-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"></path></svg>
+                        <span>Visits</span>
+                    </div>
+                </a>
+                <a class="nav-item" onclick="switchNav('tab-followups', this)">
+                    <div class="nav-item-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>Follow-ups</span>
+                    </div>
+                    <span class="nav-badge" id="sidebarFollowupCount">0</span>
+                </a>
+            </div>
+
+            <!-- Sidebar User Profile Footer -->
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="user-avatar" id="sidebarAvatar">AP</div>
+                    <div class="user-info">
+                        <h4 id="sidebarUserName">Amit Patil</h4>
+                        <p id="sidebarUserRole">Administrative</p>
+                    </div>
+                </div>
+                <button class="logout-quick-btn" title="Logout" onclick="triggerLogout()">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-workspace">
+            <!-- Header Bar -->
+            <header class="workspace-header">
+                <div class="breadcrumb-nav">
+                    <span class="breadcrumb-link" onclick="switchNav('tab-dashboard')" title="Click to go back to Dashboard">Workspace</span>
+                    <span>/</span>
+                    <span class="active" id="currentBreadcrumb">Dashboard</span>
+                </div>
+                <div class="header-actions">
+                    <div class="header-date-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span id="liveClockDate">Sun, 22 Nov 2026</span>
+                    </div>
+                    <button class="btn-header-log" id="btnSyncDb" onclick="checkAndSyncBackend(true)" title="Synchronize institutes with PostgreSQL database and Dashboard 5173" style="border-color: #3b82f6; color: #2563eb; gap: 6px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        <span id="syncDbBtnText">Sync PostgreSQL</span>
+                    </button>
+                    <button class="btn-header-log" onclick="showLoginLogs()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        Login Logs
+                    </button>
+                    <button class="btn-header-logout" onclick="triggerLogout()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Staff Banner -->
+            <div class="workspace-banner">
+                <div>
+                    <strong>STAFF WORKSPACE</strong>
+                    <span>Logged in as authorized staff. Administrative role: full access to all institutes and activities.</span>
+                </div>
+                <span style="font-size: 11.5px; opacity: 0.85;">⚡ Data Persistence Active (Zero Loss on Refresh)</span>
+            </div>
+
+            <!-- Workspace Body -->
+            <div class="workspace-body">
+
+                <!-- 1. DASHBOARD VIEW -->
+                <div id="view-dashboard" class="workspace-tab-view active">
+<!-- Introduction & Action -->
+                <div class="dashboard-intro">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <p>Customer Relationship Management • Real-time Workspace Overview</p>
+                    </div>
+                    <button class="btn-primary-add" onclick="openModal('modalAddInstitute')">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Institute
+                    </button>
+                </div>
+
+                <!-- Row 1: KPI Stats Grid -->
+                <div class="kpi-grid">
+                    <!-- Total Institutes -->
+                    <div class="kpi-card" onclick="switchNav('tab-institutes')" style="cursor: pointer;" title="Click to view Institutes Directory">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Total Institutes</span>
+                            <div class="kpi-icon-wrap blue">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 11h2M10 11h2M14 11h2M18 11h2M6 16h2M10 16h2M14 16h2M18 16h2M12 3l9 4H3l9-4z"></path></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-val-row">
+                            <span class="kpi-number" id="statInstitutes">14</span>
+                            <span class="kpi-badge up">↑ +12%</span>
+                        </div>
+                        <span class="kpi-footer-text">● Active records in database</span>
+                    </div>
+
+                    <!-- Calls Today -->
+                    <div class="kpi-card" onclick="switchNav('tab-calls')" style="cursor: pointer;" title="Click to view Call Logs">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Calls Today</span>
+                            <div class="kpi-icon-wrap green">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"></path></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-val-row">
+                            <span class="kpi-number" id="statCalls">0</span>
+                            <span class="kpi-badge sub">Logged calls</span>
+                        </div>
+                        <span class="kpi-footer-text">Manual call logs today</span>
+                    </div>
+
+                    <!-- Visits -->
+                    <div class="kpi-card" onclick="switchNav('tab-visits')" style="cursor: pointer;" title="Click to view Visits">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Visits</span>
+                            <div class="kpi-icon-wrap purple">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-val-row">
+                            <span class="kpi-number" id="statVisits">0</span>
+                            <span class="kpi-badge sub">Planned & done</span>
+                        </div>
+                        <span class="kpi-footer-text">Physical on-site visits</span>
+                    </div>
+
+                    <!-- Pending Follow-ups -->
+                    <div class="kpi-card" onclick="switchNav('tab-followups')" style="cursor: pointer;" title="Click to view Follow-ups">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Pending Follow-ups</span>
+                            <div class="kpi-icon-wrap amber">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-val-row">
+                            <span class="kpi-number" id="statFollowups">5</span>
+                            <span class="kpi-badge warn">Needs attention</span>
+                        </div>
+                        <span class="kpi-footer-text">Due & overdue follow-ups</span>
+                    </div>
+                </div>
+
+                <!-- Row 2: Analytics & Actions Grid -->
+                <div class="analytics-grid">
+                    <!-- Call & Visit Trend Chart -->
+                    <div class="dashboard-box">
+                        <div class="box-header">
+                            <div>
+                                <h3 class="box-title">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                    Call & Visit Trend
+                                </h3>
+                                <span class="box-subtitle">Weekly performance comparison</span>
+                            </div>
+                            <select class="box-pill-select">
+                                <option>Last 7 Days</option>
+                                <option>Last 30 Days</option>
+                            </select>
+                        </div>
+                        <div class="chart-wrapper">
+                            <svg class="chart-svg" viewBox="0 0 500 130" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="gradCall" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#2563eb" stop-opacity="0.25"/>
+                                        <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"/>
+                                    </linearGradient>
+                                    <linearGradient id="gradVisit" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.25"/>
+                                        <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.0"/>
+                                    </linearGradient>
+                                </defs>
+                                <!-- Grid Lines -->
+                                <line x1="0" y1="20" x2="500" y2="20" stroke="#f1f5f9" stroke-width="1"/>
+                                <line x1="0" y1="60" x2="500" y2="60" stroke="#f1f5f9" stroke-width="1"/>
+                                <line x1="0" y1="100" x2="500" y2="100" stroke="#f1f5f9" stroke-width="1"/>
+                                <!-- Area fills -->
+                                <path d="M 0,105 Q 80,90 160,70 T 320,45 T 500,25 L 500,120 L 0,120 Z" fill="url(#gradCall)"/>
+                                <path d="M 0,115 Q 80,100 160,85 T 320,60 T 500,40 L 500,120 L 0,120 Z" fill="url(#gradVisit)"/>
+                                <!-- Lines -->
+                                <path d="M 0,105 Q 80,90 160,70 T 320,45 T 500,25" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <path d="M 0,115 Q 80,100 160,85 T 320,60 T 500,40" fill="none" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                            <div class="chart-legend">
+                                <div><span class="legend-indicator" style="background: #2563eb;"></span> Calls Logged</div>
+                                <div><span class="legend-indicator" style="background: #8b5cf6;"></span> Visits Done</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Activities Donut -->
+                    <div class="dashboard-box">
+                        <div class="box-header">
+                            <div>
+                                <h3 class="box-title">Overall Activities</h3>
+                                <span class="box-subtitle">Status breakdown</span>
+                            </div>
+                        </div>
+                        <div class="donut-container">
+                            <div class="donut-graphic">
+                                <svg class="donut-svg" viewBox="0 0 36 36">
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#e2e8f0" stroke-width="4"></circle>
+                                    <!-- Completed 62% -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="54.5 33.5" stroke-dashoffset="0"></circle>
+                                    <!-- Pending 22% -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="19.3 68.7" stroke-dashoffset="-54.5"></circle>
+                                    <!-- Overdue 16% -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#ef4444" stroke-width="4" stroke-dasharray="14.2 73.8" stroke-dashoffset="-73.8"></circle>
+                                </svg>
+                                <div class="donut-center-text">
+                                    <div class="donut-total" id="donutTotalCount">322</div>
+                                    <div class="donut-sub">Total</div>
+                                </div>
+                            </div>
+                            <div class="donut-details">
+                                <div class="donut-row">
+                                    <span class="label"><span class="legend-indicator" style="background:#10b981;"></span> Completed</span>
+                                    <span class="val" id="donutCompleted">198 (62%)</span>
+                                </div>
+                                <div class="donut-row">
+                                    <span class="label"><span class="legend-indicator" style="background:#f59e0b;"></span> Pending</span>
+                                    <span class="val" id="donutPending">72 (22%)</span>
+                                </div>
+                                <div class="donut-row">
+                                    <span class="label"><span class="legend-indicator" style="background:#ef4444;"></span> Overdue</span>
+                                    <span class="val" id="donutOverdue">52 (16%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Panel -->
+                    <div class="dashboard-box">
+                        <div class="box-header">
+                            <div>
+                                <h3 class="box-title">Quick Actions</h3>
+                                <span class="box-subtitle">1-Click operations</span>
+                            </div>
+                        </div>
+                        <div class="quick-actions-list">
+                            <button class="quick-act-btn blue" onclick="openModal('modalAddInstitute')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M3 7v14M21 7v14M12 3l9 4H3l9-4z"></path></svg>
+                                <span>Add Institute</span>
+                            </button>
+                            <button class="quick-act-btn green" onclick="openModal('modalLogCall')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"></path></svg>
+                                <span>Log Call</span>
+                            </button>
+                            <button class="quick-act-btn purple" onclick="openModal('modalLogVisit')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                <span>Log Visit</span>
+                            </button>
+                            <button class="quick-act-btn amber" onclick="openModal('modalAddFollowup')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span>Add Follow-up</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Bottom Feeds Grid -->
+                <div class="bottom-grid">
+                    <!-- Recent Activities Feed -->
+                    <div class="dashboard-box">
+                        <div class="box-header">
+                            <div>
+                                <h3 class="box-title">Recent Activities</h3>
+                                <span class="box-subtitle">Live action feed across colleges</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="toggleFeedInlineBtn" onclick="toggleFeedInline()" style="font-size: 11.5px; color: #475569; font-weight: 600; cursor: pointer; background: #f1f5f9; padding: 4px 9px; border-radius: 6px; border: 1px solid #e2e8f0; transition: all 0.15s;" title="Expand list right here in dashboard">Expand Feed</span>
+                                <span id="viewAllActivitiesBtn" onclick="openAllActivitiesModal()" style="font-size: 12px; color: #2563eb; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Open complete activities history dialog">View All &rarr;</span>
+                            </div>
+                        </div>
+                        <div class="activity-feed-list" id="activityFeedList">
+                            <!-- Populated dynamically from storage -->
+                        </div>
+                    </div>
+
+                    <!-- Team Performance Overview -->
+                    <div class="dashboard-box">
+                        <div class="box-header">
+                            <div>
+                                <h3 class="box-title">Team Overview</h3>
+                                <span class="box-subtitle">Active sales & calling executives</span>
+                            </div>
+                            <span style="font-size: 12px; color: #64748b; font-weight: 500;">This week</span>
+                        </div>
+                        <div class="team-list" id="teamMemberList">
+                            <!-- Populated dynamically from storage -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+                                <!-- 2. INSTITUTES VIEW -->
+                <div id="view-institutes" class="workspace-tab-view">
+                    <div>
+                        <div class="sub-header-uppercase">Customer Relationship Management</div>
+                        <div class="view-page-title-row">
+                            <h1>Institutes</h1>
+                            <button class="btn-primary-add" onclick="openModal('modalAddInstitute')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add Institute
+                            </button>
+                        </div>
+                        <div class="view-page-sub">Manage registered educational institutes and colleges.</div>
+                    </div>
+
+                    <div class="view-banner-box">
+                        Administrative role: full access to all institutes and activities.
+                    </div>
+
+                    <div class="view-staff-box">
+                        <strong>STAFF WORKSPACE</strong>
+                        <span>Logged in as authorized staff. Passwords set to <code>root</code>.</span>
+                    </div>
+
+                    <div class="search-filter-bar">
+                        <div class="search-input-wrap">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="searchInstitutesInput" placeholder="Search customer, institute name, city or district..." oninput="renderInstitutesTable()">
+                        </div>
+                    </div>
+
+                    <div class="data-table-card">
+                        <div class="data-table-header">
+                            <div>
+                                <h4>Customer directory</h4>
+                                <p>Complete directory of registered colleges and societies</p>
+                            </div>
+                            <span class="count-pill-badge" id="instTableCountBadge">14 institutes</span>
+                        </div>
+                        <div style="width: 100%; max-width: 100%; overflow-x: auto;">
+                            <table class="crm-table">
+                                <thead>
+                                    <tr>
+                                        <th>CUSTOMER / COMPANY</th>
+                                        <th>LOCATION</th>
+                                        <th>ASSIGNED TO</th>
+                                        <th>PRIORITY</th>
+                                        <th>LEAD STATUS</th>
+                                        <th>ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="institutesTableBody">
+                                    <!-- Dynamic -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. CALL LOGS VIEW (Exact match localhost:5173) -->
+                <div id="view-calls" class="workspace-tab-view">
+                    <div>
+                        <div class="sub-header-uppercase">Customer Relationship Management</div>
+                        <div class="view-page-title-row">
+                            <h1>Call Logs</h1>
+                            <button class="btn-primary-add" onclick="openModal('modalLogCall')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Log Call
+                            </button>
+                        </div>
+                        <div class="view-page-sub">Track calls and their outcomes.</div>
+                    </div>
+
+                    <div class="view-banner-box">
+                        Administrative role: full access to all institutes and activities.
+                    </div>
+
+                    <div class="view-staff-box">
+                        <strong>STAFF WORKSPACE</strong>
+                        <span>Logged in as authorized staff. Passwords set to <code>root</code>.</span>
+                    </div>
+
+                    <div class="search-filter-bar">
+                        <div class="search-input-wrap">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="searchCallsInput" placeholder="Search call records..." oninput="renderCallsTable()">
+                        </div>
+                        <select class="search-filter-select" id="filterCallsOutcome" onchange="renderCallsTable()">
+                            <option value="">All outcomes</option>
+                            <option value="Interested">Interested</option>
+                            <option value="Follow-up Required">Follow-up Required</option>
+                            <option value="Meeting Scheduled">Meeting Scheduled</option>
+                            <option value="Not Interested">Not Interested</option>
+                            <option value="Busy / No Answer">Busy / No Answer</option>
+                        </select>
+                    </div>
+
+                    <div class="data-table-card">
+                        <div class="data-table-header">
+                            <div>
+                                <h4>Call history</h4>
+                                <p>Manually record calls and their outcomes</p>
+                            </div>
+                            <span class="count-pill-badge" id="callTableCountBadge">0 logs</span>
+                        </div>
+                        <div style="width: 100%; max-width: 100%; overflow-x: auto;">
+                            <table class="crm-table">
+                                <thead>
+                                    <tr>
+                                        <th>CUSTOMER</th>
+                                        <th>CALL TYPE</th>
+                                        <th>DATE & TIME</th>
+                                        <th>OUTCOME</th>
+                                        <th>NOTES</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="callsTableBody">
+                                    <!-- Dynamic -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="footer-disclaimer-note">
+                        This prototype records calls entered by the user. It does not place or automatically detect phone calls.
+                    </div>
+                </div>
+
+                <!-- 4. VISITS VIEW (Exact match localhost:5173) -->
+                <div id="view-visits" class="workspace-tab-view">
+                    <div>
+                        <div class="sub-header-uppercase">Customer Relationship Management</div>
+                        <div class="view-page-title-row">
+                            <h1>Visits</h1>
+                            <button class="btn-primary-add" onclick="openModal('modalLogVisit')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Record Visit
+                            </button>
+                        </div>
+                        <div class="view-page-sub">Plan and record customer visits.</div>
+                    </div>
+
+                    <div class="view-banner-box">
+                        Administrative role: full access to all institutes and activities.
+                    </div>
+
+                    <div class="view-staff-box">
+                        <strong>STAFF WORKSPACE</strong>
+                        <span>Logged in as authorized staff. Passwords set to <code>root</code>.</span>
+                    </div>
+
+                    <div class="search-filter-bar">
+                        <div class="search-input-wrap">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="searchVisitsInput" placeholder="Search customer, company or employee..." oninput="renderVisitsTable()">
+                        </div>
+                        <select class="search-filter-select" id="filterVisitsStatus" onchange="renderVisitsTable()">
+                            <option value="">All visit statuses</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="data-table-card">
+                        <div class="data-table-header">
+                            <div>
+                                <h4>Visit records</h4>
+                                <p>Plan and track customer meetings</p>
+                            </div>
+                            <span class="count-pill-badge" id="visitTableCountBadge">0 visits</span>
+                        </div>
+                        <div style="width: 100%; max-width: 100%; overflow-x: auto;">
+                            <table class="crm-table">
+                                <thead>
+                                    <tr>
+                                        <th>CUSTOMER / COMPANY</th>
+                                        <th>VISIT DATE</th>
+                                        <th>ASSIGNED TO</th>
+                                        <th>STATUS</th>
+                                        <th>ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="visitsTableBody">
+                                    <!-- Dynamic -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+<!-- 5. FOLLOW-UPS VIEW (Exact match Screenshot 4) -->
+                <div id="view-followups" class="workspace-tab-view">
+                    <div>
+                        
+                    </div>
+                    <div class="dashboard-intro">
+                        <div>
+                            <h1>Follow-ups</h1>
+                            <p>Never miss your next customer follow-up.</p>
+                        </div>
+                        <button class="btn-primary-add" onclick="openModal('modalAddFollowup')">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Schedule Follow-up
+                        </button>
+                    </div>
+
+                    <!-- 3 Stat Cards Row matching Screenshot 4 -->
+                    <div class="followup-cards-grid">
+                        <div class="followup-metric-card">
+                            <div>
+                                <div class="f-label">Due today</div>
+                                <div class="f-val" id="followupDueToday">0</div>
+                            </div>
+                            <div class="kpi-icon-wrap amber">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                        </div>
+                        <div class="followup-metric-card">
+                            <div>
+                                <div class="f-label">Overdue</div>
+                                <div class="f-val" id="followupOverdue">0</div>
+                            </div>
+                            <div class="kpi-icon-wrap amber" style="background:#fef2f2; color:#ef4444;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            </div>
+                        </div>
+                        <div class="followup-metric-card">
+                            <div>
+                                <div class="f-label">Upcoming</div>
+                                <div class="f-val" id="followupUpcoming">1</div>
+                            </div>
+                            <div class="kpi-icon-wrap blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="search-filter-bar">
+                        <div class="search-input-wrap">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="searchFollowupsInput" placeholder="Search follow-ups..." oninput="renderFollowupsView()">
+                        </div>
+                        <select class="search-filter-select" id="filterFollowupsStatus" onchange="renderFollowupsView()">
+                            <option value="">All follow-ups</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+
+                    <div class="data-table-card">
+                        <div class="data-table-header">
+                            <div>
+                                <h4>Follow-up schedule</h4>
+                                <p>Stay on top of your next customer call</p>
+                            </div>
+                        </div>
+                        <div style="padding: 16px 20px; display:flex; flex-direction:column; gap:12px;" id="followupsListContainer">
+                            <!-- Dynamic -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+            <!-- ================= 3. AUTHENTICATION MODAL (LOGIN / REGISTER) ================= -->
+    <div class="auth-overlay" id="authOverlay" style="display: none;">
+        <div class="auth-card">
+            
+            <div class="auth-brand-center">
+                <div class="auth-logo-badge">C</div>
+                <h2>ConnectFlow CRM</h2>
+                <p>Connect, Manage & Grow Your Workspace</p>
+            </div>
+
+            <!-- Tabs: Sign In / Create Account -->
+            <div class="auth-segmented-tabs">
+                <button class="auth-tab-btn active" id="tabSignInBtn" onclick="switchAuthTab('signin')">Sign In</button>
+                <button class="auth-tab-btn" id="tabCreateBtn" onclick="switchAuthTab('create')">Create Account</button>
+            </div>
+
+            <!-- Logout Alert Banner (Visible when logged out) -->
+            <div class="auth-alert-banner" id="logoutAlertBanner" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>You have been safely logged out.</span>
+            </div>
+
+            <!-- Form 1: SIGN IN -->
+            <form class="auth-form" id="formSignIn" onsubmit="handleSignIn(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="signInEmail" value="amit.patil@example.com" placeholder="name@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signInPassword" value="password123" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-auth-submit">Sign In to Workspace</button>
+
+                <!-- 1-Click Role Fill -->
+                <div class="quick-role-section">
+                    <div class="quick-role-title">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        1-Click Role Fill
+                    </div>
+                    <div class="role-btn-row">
+                        <button type="button" class="role-pill-btn" onclick="quickFillRole('admin')">
+                            <span>👤</span> Admin Access
+                        </button>
+                        <button type="button" class="role-pill-btn" onclick="quickFillRole('calling')">
+                            <span>📞</span> Calling Team
+                        </button>
+                    </div>
+                </div>
+
+                <div class="auth-footer-note">
+                    🔒 Secure Authentication • ConnectFlow CRM Workspace
+                </div>
+            </form>
+
+            <!-- Form 2: CREATE ACCOUNT -->
+            <form class="auth-form" id="formCreateAccount" style="display: none;" onsubmit="handleCreateAccount(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="createName" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="createEmail" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number (Optional)</label>
+                    <input type="tel" id="createPhone" placeholder="+91 9876543210">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="createRole">
+                        <option value="Calling Team">📞 Calling Team</option>
+                        <option value="Sales Executive">💼 Sales Executive</option>
+                        <option value="Field Executive">🚗 Field Executive</option>
+                        <option value="Administrative">👑 Administrative</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="createPassword" placeholder="Create a password" required>
+                </div>
+                <button type="submit" class="btn-auth-submit green-submit">Create Account & Sign In</button>
+                <div class="auth-footer-note">
+                    Instant offline encrypted profile storage
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ================= 4. MODALS (Add Institute, Log Call, etc.) ================= -->
+    <!-- Modal: Add Institute -->
+    <div class="app-modal-overlay" id="modalAddInstitute">
+        <div class="modal-dialog large">
+            <div class="modal-header" style="flex-direction: column; align-items: flex-start; position: relative;">
+                <span class="modal-sub-label">CONNECTFLOW CRM</span>
+                <h3 style="font-size: 19px; margin-top: 2px;">Add Institute</h3>
+                <button class="modal-close-btn" style="position: absolute; right: 0; top: 0;" onclick="closeModal('modalAddInstitute')">&times;</button>
+            </div>
+            <form onsubmit="saveInstitute(event)" style="display:flex; flex-direction:column; gap:14px;">
+                <!-- Institute Name -->
+                <div class="form-group">
+                    <label>Institute Name *</label>
+                    <input type="text" id="instName" placeholder="e.g. Shree Ganesh Co Op Credit Society Ltd." required>
+                </div>
+
+                <!-- Street / Area -->
+                <div class="form-group">
+                    <label>Street / Area</label>
+                    <input type="text" id="instStreet" placeholder="e.g. Demo Market Road">
+                </div>
+
+                <!-- Gaon / Village & Taluka -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Gaon / Village</label>
+                        <input type="text" id="instVillage" placeholder="e.g. Shivajinagar">
+                    </div>
+                    <div class="form-group">
+                        <label>Taluka</label>
+                        <input type="text" id="instTaluka" placeholder="e.g. Haveli">
+                    </div>
+                </div>
+
+                <!-- District & State -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>District</label>
+                        <input type="text" id="instDistrict" placeholder="e.g. Pune">
+                    </div>
+                    <div class="form-group">
+                        <label>State</label>
+                        <input type="text" id="instState" placeholder="e.g. Maharashtra" value="Maharashtra">
+                    </div>
+                </div>
+
+                <!-- PIN Code -->
+                <div class="form-group">
+                    <label>PIN Code</label>
+                    <input type="text" id="instPincode" placeholder="e.g. 411005 (6 digits)" maxlength="6">
+                </div>
+
+                <!-- Contact Person(s) -->
+                <div class="form-group">
+                    <label>Contact Person(s)</label>
+                    <textarea id="instContacts" rows="3" placeholder="One person per line: Name | Position | Contact No.&#10;Example: Sunil Patil | Principal | 9876543210" style="padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;"></textarea>
+                </div>
+
+                <!-- Reference By & Reference From -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Reference By</label>
+                        <input type="text" id="instRefBy" placeholder="e.g. Amit Patil">
+                    </div>
+                    <div class="form-group">
+                        <label>Reference From</label>
+                        <select id="instRefFrom">
+                            <option value="">Select source</option>
+                            <option value="Direct Outreach">Direct Outreach</option>
+                            <option value="Existing Reference">Existing Reference</option>
+                            <option value="Education Fair / Event">Education Fair / Event</option>
+                            <option value="Calling Campaign">Calling Campaign</option>
+                            <option value="Website Inbound">Website Inbound</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- No. of Branches & Priority -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>No. of Branches</label>
+                        <input type="number" id="instBranches" placeholder="e.g. 5" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="instPriority">
+                            <option value="High" selected>High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Assigned Employee & Lead Status -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Assigned Employee *</label>
+                        <select id="instAssignedEmp" required>
+                            <option value="Unassigned" selected>Unassigned</option>
+                            <option value="Amit Patil">Amit Patil</option>
+                            <option value="Sneha Deshmukh">Sneha Deshmukh</option>
+                            <option value="Rohit More">Rohit More</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Lead Status *</label>
+                        <select id="instLeadStatus" required>
+                            <option value="New" selected>New</option>
+                            <option value="Contacted">Contacted</option>
+                            <option value="Follow-up Needed">Follow-up Needed</option>
+                            <option value="In Discussion">In Discussion</option>
+                            <option value="Qualified">Qualified</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Next Follow-up Date & Time -->
+                <div class="form-group">
+                    <label>Next Follow-up Date & Time</label>
+                    <input type="datetime-local" id="instNextFollowup">
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="instNotes" rows="2" placeholder="e.g. Interested in software demo; asked for quotation" style="padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;"></textarea>
+                </div>
+
+                <div class="modal-footer" style="margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modalAddInstitute')">Cancel</button>
+                    <button type="submit" class="btn-confirm" style="padding: 10px 22px; font-size: 13.5px;">Save record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Log Call -->
+    <div class="app-modal-overlay" id="modalLogCall">
+        <div class="modal-dialog large">
+            <div class="modal-header" style="flex-direction: column; align-items: flex-start; position: relative;">
+                <span class="modal-sub-label">CONNECTFLOW CRM</span>
+                <h3 style="font-size: 19px; margin-top: 2px;">Log a Call</h3>
+                <button class="modal-close-btn" style="position: absolute; right: 0; top: 0;" onclick="closeModal('modalLogCall')">&times;</button>
+            </div>
+            <form onsubmit="saveCall(event)" style="display:flex; flex-direction:column; gap:14px;">
+                <!-- Customer -->
+                <div class="form-group">
+                    <label>Customer *</label>
+                    <select id="callCustomer" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Call type & Call date & time -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Call type</label>
+                        <select id="callType">
+                            <option value="Outgoing" selected>Outgoing</option>
+                            <option value="Incoming">Incoming</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Call date & time *</label>
+                        <input type="datetime-local" id="callDateTime" required>
+                    </div>
+                </div>
+
+                <!-- Employee who called & Contact person called -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Employee who called *</label>
+                        <select id="callEmployee" required>
+                            <option value="Unassigned" selected>Unassigned</option>
+                            <option value="Amit Patil">Amit Patil</option>
+                            <option value="Sneha Deshmukh">Sneha Deshmukh</option>
+                            <option value="Rohit More">Rohit More</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact person called</label>
+                        <input type="text" id="callContactPerson" placeholder="e.g. Sunil Patil">
+                    </div>
+                </div>
+
+                <!-- Contact number & Call outcome -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Contact number</label>
+                        <input type="tel" id="callContactNumber" placeholder="e.g. 9876543210">
+                    </div>
+                    <div class="form-group">
+                        <label>Call outcome *</label>
+                        <select id="callOutcome" required>
+                            <option value="Interested" selected>Interested</option>
+                            <option value="Follow-up Required">Follow-up Required</option>
+                            <option value="Meeting Scheduled">Meeting Scheduled</option>
+                            <option value="Not Interested">Not Interested</option>
+                            <option value="Busy / No Answer">Busy / No Answer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Next follow-up date & time -->
+                <div class="form-group">
+                    <label>Next follow-up date & time</label>
+                    <input type="datetime-local" id="callNextFollowup">
+                </div>
+
+                <!-- Call notes -->
+                <div class="form-group">
+                    <label>Call notes</label>
+                    <textarea id="callNotes" rows="2" placeholder="What was discussed? What happens next?" style="padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;"></textarea>
+                </div>
+
+                <div class="modal-footer" style="margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modalLogCall')">Cancel</button>
+                    <button type="submit" class="btn-confirm" style="padding: 10px 22px; font-size: 13.5px;">Save record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Record Customer Visit -->
+    <div class="app-modal-overlay" id="modalLogVisit">
+        <div class="modal-dialog large">
+            <div class="modal-header" style="flex-direction: column; align-items: flex-start; position: relative;">
+                <span class="modal-sub-label">CONNECTFLOW CRM</span>
+                <h3 style="font-size: 19px; margin-top: 2px;">Record Customer Visit</h3>
+                <button class="modal-close-btn" style="position: absolute; right: 0; top: 0;" onclick="closeModal('modalLogVisit')">&times;</button>
+            </div>
+            <form onsubmit="saveVisit(event)" style="display:flex; flex-direction:column; gap:14px;">
+                <!-- Customer / company -->
+                <div class="form-group">
+                    <label>Customer / company *</label>
+                    <select id="visitCustomer" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Visit date & time & Contact person met -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Visit date & time *</label>
+                        <input type="datetime-local" id="visitDateTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact person met</label>
+                        <input type="text" id="visitContactPerson" placeholder="e.g. Sunil Patil">
+                    </div>
+                </div>
+
+                <!-- Contact number & Assigned employee -->
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Contact number</label>
+                        <input type="tel" id="visitContactNumber" placeholder="e.g. 9876543210">
+                    </div>
+                    <div class="form-group">
+                        <label>Assigned employee</label>
+                        <select id="visitAssignedEmployee">
+                            <option value="Unassigned" selected>Unassigned</option>
+                            <option value="Amit Patil">Amit Patil</option>
+                            <option value="Sneha Deshmukh">Sneha Deshmukh</option>
+                            <option value="Rohit More">Rohit More</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Visit status -->
+                <div class="form-group">
+                    <label>Visit status</label>
+                    <select id="visitStatus">
+                        <option value="Scheduled" selected>Scheduled</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Purpose -->
+                <div class="form-group">
+                    <label>Purpose</label>
+                    <input type="text" id="visitPurpose" placeholder="Purpose of visit">
+                </div>
+
+                <!-- Visit notes -->
+                <div class="form-group">
+                    <label>Visit notes</label>
+                    <textarea id="visitNotes" rows="2" placeholder="Visit outcome and next steps" style="padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;"></textarea>
+                </div>
+
+                <div class="modal-footer" style="margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modalLogVisit')">Cancel</button>
+                    <button type="submit" class="btn-confirm" style="padding: 10px 22px; font-size: 13.5px;">Save record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Schedule Follow-up -->
+    <div class="app-modal-overlay" id="modalAddFollowup">
+        <div class="modal-dialog large">
+            <div class="modal-header" style="flex-direction: column; align-items: flex-start; position: relative;">
+                <span class="modal-sub-label">CONNECTFLOW CRM</span>
+                <h3 style="font-size: 19px; margin-top: 2px;">Schedule Follow-up</h3>
+                <button class="modal-close-btn" style="position: absolute; right: 0; top: 0;" onclick="closeModal('modalAddFollowup')">&times;</button>
+            </div>
+            <form onsubmit="saveFollowup(event)" style="display:flex; flex-direction:column; gap:14px;">
+                <!-- Customer -->
+                <div class="form-group">
+                    <label>Customer *</label>
+                    <select id="followupCustomer" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Follow-up date & time -->
+                <div class="form-group">
+                    <label>Follow-up date & time *</label>
+                    <input type="datetime-local" id="followupDateTime" required>
+                </div>
+
+                <!-- Assigned employee -->
+                <div class="form-group">
+                    <label>Assigned employee</label>
+                    <select id="followupAssignedEmployee">
+                        <option value="Unassigned" selected>Unassigned</option>
+                        <option value="Amit Patil">Amit Patil</option>
+                        <option value="Sneha Deshmukh">Sneha Deshmukh</option>
+                        <option value="Rohit More">Rohit More</option>
+                    </select>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="followupNotes" rows="2" placeholder="What needs to be discussed?" style="padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;"></textarea>
+                </div>
+
+                <div class="modal-footer" style="margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modalAddFollowup')">Cancel</button>
+                    <button type="submit" class="btn-confirm" style="padding: 10px 22px; font-size: 13.5px;">Save record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Login Logs -->
+    <div class="app-modal-overlay" id="modalLoginLogs">
+        <div class="modal-dialog" style="max-width: 540px;">
+            <div class="modal-header">
+                <h3>Login & Activity Audit Logs</h3>
+                <button class="modal-close-btn" onclick="closeModal('modalLoginLogs')">&times;</button>
+            </div>
+            <div style="max-height: 280px; overflow-y: auto; display:flex; flex-direction:column; gap:8px;" id="loginLogsContainer">
+                <!-- Log entries -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal('modalLoginLogs')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: All Recent Activities & Action Feed -->
+    <div class="app-modal-overlay" id="modalAllActivities">
+        <div class="modal-dialog large" style="max-height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="flex-direction: column; align-items: flex-start; position: relative;">
+                <span class="modal-sub-label">CONNECTFLOW CRM • LIVE ACTION FEED</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 4px;">
+                    <h3 style="font-size: 19px;">All Recent Activities</h3>
+                    <span id="allActivitiesCountBadge" class="count-pill-badge" style="margin-right: 36px;">0 activities</span>
+                </div>
+                <button class="modal-close-btn" style="position: absolute; right: 0; top: 0;" onclick="closeModal('modalAllActivities')">&times;</button>
+            </div>
+            
+            <!-- Search & Filter Controls -->
+            <div style="padding: 12px 0 10px 0; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #e2e8f0; margin-bottom: 12px;">
+                <input type="text" id="searchAllActivitiesInput" placeholder="Search activities by institute, caller, type, status..." style="flex: 1; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;" oninput="renderAllActivitiesModalList()">
+                <select id="filterActivityTypeSelect" style="padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: white; cursor: pointer;" onchange="renderAllActivitiesModalList()">
+                    <option value="">All Types</option>
+                    <option value="call">Calls</option>
+                    <option value="visit">Visits</option>
+                    <option value="clock">Follow-ups</option>
+                </select>
+            </div>
+
+            <!-- Scrollable Full List -->
+            <div style="overflow-y: auto; flex: 1; min-height: 280px; max-height: 420px; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;" id="allActivitiesFullList">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="modal-footer" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: #64748b;">Real-time feed stored persistently in your local CRM database</span>
+                <button type="button" class="btn-cancel" onclick="closeModal('modalAllActivities')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ================= 5. COMPLETE PERSISTENT JAVASCRIPT LOGIC ================= -->
+    <script>
+        const STORAGE_PREFIX = 'cf_crm_';
+
+        // 1. Storage Helpers
+        function getStore(key, defaultVal) {
+            try {
+                const val = localStorage.getItem(STORAGE_PREFIX + key);
+                return val ? JSON.parse(val) : defaultVal;
+            } catch (e) {
+                return defaultVal;
+            }
+        }
+
+        function setStore(key, val) {
+            try {
+                localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(val));
+            } catch (e) {
+                console.error("Storage error:", e);
+            }
+        }
+
+        // 2. Initialize Seed Data if Empty (Runs only once)
+        function initSeedData() {
+            if (!getStore('users', null)) {
+                const defaultUsers = [
+                    { name: 'Amit Patil', email: 'amit.patil@example.com', role: 'Administrative', password: 'password123', avatar: 'AP' },
+                    { name: 'Sneha Deshmukh', email: 'sneha.deshmukh@example.com', role: 'Calling Team', password: 'password123', avatar: 'SD' },
+                    { name: 'Rohit More', email: 'rohit.more@example.com', role: 'Field Executive', password: 'password123', avatar: 'RM' }
+                ];
+                setStore('users', defaultUsers);
+            }
+
+            if (!getStore('institutes', null)) {
+                const defaultInstitutes = [
+                    { id: 76, name: 'DY.PATIL CLG ENGINNERING', city: 'Akurdi, Haveli, Pune', nextFollowup: '2026-11-23T03:59:00Z', assignedTo: 'Amit Patil', leadStatus: 'New', priority: 'High' },
+                    { id: 1, name: 'Modern College of Engineering, Pune', city: 'Pune' },
+                    { id: 2, name: 'DY Patil College of Engineering', city: 'Pune' },
+                    { id: 3, name: 'Shree Ganesh Multistate Credit Co-Op', city: 'Nashik' },
+                    { id: 4, name: 'COEP Technological University', city: 'Pune' },
+                    { id: 5, name: 'MIT World Peace University', city: 'Pune' },
+                    { id: 6, name: 'Vishwakarma Institute of Technology', city: 'Pune' },
+                    { id: 7, name: 'Bharati Vidyapeeth Deemed University', city: 'Pune' },
+                    { id: 8, name: 'Sinhgad College of Engineering', city: 'Vadgaon' },
+                    { id: 9, name: 'Pimpri Chinchwad College of Engg', city: 'Nigdi' },
+                    { id: 10, name: 'Cummins College of Engineering', city: 'Karvenagar' },
+                    { id: 11, name: 'AISSMS College of Engineering', city: 'Shivajinagar' },
+                    { id: 12, name: 'JSPM Rajarshi Shahu College', city: 'Tathawade' },
+                    { id: 13, name: 'Indira College of Engineering', city: 'Parandwadi' },
+                    { id: 14, name: 'Dr. D. Y. Patil Institute of Tech', city: 'Pimpri' }
+                ];
+                setStore('institutes', defaultInstitutes);
+            }
+
+                                    if (!getStore('calls', null)) {
+                setStore('calls', [
+                    { id: 201, customer: 'DY Patil College of Engineering', callType: 'Outgoing', callDateTime: '2026-11-18 13:28', employee: 'Rohit Shinde', outcome: 'Interested', notes: 'Initial software presentation scheduled for next week.' }
+                ]);
+            }
+
+            if (!getStore('visits', null)) {
+                setStore('visits', [
+                    { id: 301, customer: 'Shree Ganesh Co-Op Credit Society Ltd.', visitDateTime: '2026-11-19 11:30', assignedEmployee: 'Amit Patil', status: 'Scheduled', purpose: 'On-site Demo & Security Audit', notes: 'Meeting with General Manager.' }
+                ]);
+            }
+
+            if (!getStore('followups', null)) {
+                setStore('followups', [
+                    { id: 101, customer: 'Modern College Pune', followupDateTime: '2026-11-19T05:34', assignedEmployee: 'Amit Patil', notes: 'interested in demo session', status: 'upcoming' }
+                ]);
+            }
+
+            if (!getStore('activities', null)) {
+                const defaultActivities = [
+                    { type: 'call', title: 'Call logged for DY Patil College of Engineering', meta: 'By Rohit Shinde • 18 Nov, 01:28 PM', status: 'completed' },
+                    { type: 'visit', title: 'Visit scheduled for Shree Ganesh Co-Op Credit Society Ltd.', meta: 'By Amit Patil • 19 Nov, 11:30 AM', status: 'scheduled' },
+                    { type: 'clock', title: 'Follow-up added for Ganesha Multistate Credit Co-Op Society Ltd.', meta: 'By Neha Shah • 20 Nov, 04:00 PM', status: 'pending' },
+                    { type: 'call', title: 'Curriculum pitch call with Modern College Principal', meta: 'By Sneha Deshmukh • 21 Nov, 10:15 AM', status: 'completed' }
+                ];
+                setStore('activities', defaultActivities);
+            }
+
+            if (!getStore('login_logs', null)) {
+                setStore('login_logs', [
+                    { user: 'Amit Patil', action: 'LOGIN_SUCCESS', time: new Date().toLocaleString(), ip: '127.0.0.1' }
+                ]);
+            }
+        }
+
+        // 3. User Session Management
+        let currentUser = null;
+
+        function checkSession() {
+            currentUser = getStore('active_user', null);
+            if (currentUser) {
+                applyUserToUI(currentUser);
+                document.getElementById('authOverlay').style.display = 'none';
+            } else {
+                openAuthModal();
+            }
+        }
+
+        function applyUserToUI(user) {
+            document.getElementById('sidebarUserName').innerText = user.name;
+            document.getElementById('sidebarUserRole').innerText = user.role;
+            document.getElementById('sidebarAvatar').innerText = user.avatar || user.name.slice(0, 2).toUpperCase();
+        }
+
+        function openAuthModal() {
+            document.getElementById('authOverlay').style.display = 'flex';
+        }
+
+        function triggerLogout() {
+            if (currentUser) {
+                addAuditLog(currentUser.name, 'LOGOUT_SUCCESS');
+            }
+            currentUser = null;
+            setStore('active_user', null);
+            document.getElementById('logoutAlertBanner').style.display = 'flex';
+            openAuthModal();
+            showToast("You have been safely logged out.");
+        }
+
+        function switchAuthTab(tab) {
+            const btnSign = document.getElementById('tabSignInBtn');
+            const btnCreate = document.getElementById('tabCreateBtn');
+            const formSign = document.getElementById('formSignIn');
+            const formCreate = document.getElementById('formCreateAccount');
+
+            if (tab === 'signin') {
+                btnSign.classList.add('active');
+                btnCreate.classList.remove('active');
+                formSign.style.display = 'flex';
+                formCreate.style.display = 'none';
+            } else {
+                btnSign.classList.remove('active');
+                btnCreate.classList.add('active');
+                formSign.style.display = 'none';
+                formCreate.style.display = 'flex';
+            }
+        }
+
+        function quickFillRole(roleType) {
+            if (roleType === 'admin') {
+                document.getElementById('signInEmail').value = 'amit.patil@example.com';
+                document.getElementById('signInPassword').value = 'password123';
+            } else {
+                document.getElementById('signInEmail').value = 'sneha.deshmukh@example.com';
+                document.getElementById('signInPassword').value = 'password123';
+            }
+            showToast("Credentials filled. Click 'Sign In' or submit!");
+        }
+
+        function handleSignIn(e) {
+            e.preventDefault();
+            const email = document.getElementById('signInEmail').value.trim();
+            const pass = document.getElementById('signInPassword').value.trim();
+            const users = getStore('users', []);
+
+            const match = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === pass);
+            if (match) {
+                currentUser = match;
+                setStore('active_user', match);
+                applyUserToUI(match);
+                addAuditLog(match.name, 'LOGIN_SUCCESS');
+                document.getElementById('authOverlay').style.display = 'none';
+                showToast(`Welcome back, ${match.name}!`);
+            } else {
+                alert("Invalid email or password! Please check or use 1-Click Role Fill.");
+            }
+        }
+
+        function handleCreateAccount(e) {
+            e.preventDefault();
+            const name = document.getElementById('createName').value.trim();
+            const email = document.getElementById('createEmail').value.trim();
+            const role = document.getElementById('createRole').value;
+            const pass = document.getElementById('createPassword').value.trim();
+
+            if (!name || !email || !pass) return;
+
+            const users = getStore('users', []);
+            if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+                alert("Account with this email already exists!");
+                return;
+            }
+
+            const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+            const newUser = { name, email, role, password: pass, avatar: initials };
+            users.push(newUser);
+            setStore('users', users);
+
+            currentUser = newUser;
+            setStore('active_user', newUser);
+            applyUserToUI(newUser);
+            addAuditLog(newUser.name, 'ACCOUNT_CREATED_AND_LOGGED_IN');
+            document.getElementById('authOverlay').style.display = 'none';
+            showToast(`Account created! Welcome, ${name}!`);
+        }
+
+        // 4. Render Dynamic Dashboard Data
+        function renderDashboard() {
+            const institutes = getStore('institutes', []);
+            const activities = getStore('activities', []);
+            const users = getStore('users', []);
+
+            // Numbers
+            document.getElementById('statInstitutes').innerText = institutes.length;
+            document.getElementById('sidebarInstCount').innerText = institutes.length;
+
+            // Activities Feed
+            const feedContainer = document.getElementById('activityFeedList');
+            feedContainer.innerHTML = '';
+            const displayList = isFeedExpanded ? activities : activities.slice(0, 5);
+
+            const toggleBtn = document.getElementById('toggleFeedInlineBtn');
+            if (toggleBtn) {
+                if (activities.length > 5) {
+                    toggleBtn.style.display = 'inline-block';
+                    toggleBtn.innerText = isFeedExpanded ? 'Show Less' : `Expand All (${activities.length})`;
+                } else {
+                    toggleBtn.style.display = 'none';
+                }
+            }
+
+            const viewAllBtn = document.getElementById('viewAllActivitiesBtn');
+            if (viewAllBtn) {
+                viewAllBtn.innerHTML = `View All (${activities.length}) &rarr;`;
+            }
+
+            if (activities.length === 0) {
+                feedContainer.innerHTML = '<div style="padding:24px; text-align:center; color:#94a3b8; font-size:13px;">No activities recorded yet.</div>';
+            } else {
+                displayList.forEach(act => {
+                    const iconClass = act.type === 'call' ? 'phone' : (act.type === 'visit' ? 'visit' : 'clock');
+                    const svgPath = act.type === 'call' 
+                        ? '<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"></path>'
+                        : (act.type === 'visit' 
+                            ? '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle>'
+                            : '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>');
+
+                    const row = document.createElement('div');
+                    row.className = 'activity-row';
+                    row.innerHTML = `
+                        <div class="act-left">
+                            <div class="act-icon ${iconClass}">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${svgPath}</svg>
+                            </div>
+                            <div class="act-texts">
+                                <h5>${act.title}</h5>
+                                <p>${act.meta}</p>
+                            </div>
+                        </div>
+                        <span class="status-pill ${act.status}">${(act.status || 'COMPLETED').toUpperCase()}</span>
+                    `;
+                    feedContainer.appendChild(row);
+                });
+            }
+
+            // Team Members
+            const teamContainer = document.getElementById('teamMemberList');
+            teamContainer.innerHTML = '';
+            const colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'];
+            users.slice(0, 4).forEach((u, idx) => {
+                const color = colors[idx % colors.length];
+                const calls = 18 - (idx * 3);
+                const visits = 5 - (idx * 1);
+                const item = document.createElement('div');
+                item.className = 'team-member-item';
+                item.innerHTML = `
+                    <div class="team-user-details">
+                        <div class="team-badge-avatar" style="background:${color};">${u.avatar || u.name.slice(0,2).toUpperCase()}</div>
+                        <div class="team-texts">
+                            <h5>${u.name}</h5>
+                            <p>${u.role}</p>
+                        </div>
+                    </div>
+                    <div class="team-counters">
+                        <div class="team-stat-item">${calls}<small>Calls</small></div>
+                        <div class="team-stat-item">${visits}<small>Visits</small></div>
+                    </div>
+                `;
+                teamContainer.appendChild(item);
+            });
+        }
+
+        // ================= 4.5. LIVE POSTGRESQL & SPRING BOOT REST API SYNC =================
+        const API_BASE_URL = 'http://localhost:8080/api';
+        let isBackendConnected = false;
+
+        function mapReferenceFromToBackend(val) {
+            const allowed = ["Employee", "Existing Institute", "Website", "WhatsApp", "Other"];
+            if (allowed.includes(val)) return val;
+            if (val === 'Existing Reference' || val === 'Direct Outreach') return 'Existing Institute';
+            if (val === 'Calling Campaign') return 'Employee';
+            if (val === 'Website Inbound') return 'Website';
+            return 'Other';
+        }
+
+        function mapLeadStatusToBackend(val) {
+            if (!val) return 'New';
+            const v = val.toLowerCase();
+            if (v.includes('new')) return 'New';
+            if (v.includes('contact')) return 'Contacted';
+            if (v.includes('interest')) return 'Interested';
+            if (v.includes('follow')) return 'Follow-up';
+            if (v.includes('convert')) return 'Converted';
+            if (v.includes('not')) return 'Not Interested';
+            return 'New';
+        }
+
+        function mapPriorityToBackend(val) {
+            if (!val) return 'Medium';
+            const v = val.toLowerCase();
+            if (v.includes('high')) return 'High';
+            if (v.includes('low')) return 'Low';
+            return 'Medium';
+        }
+
+        function updateBackendStatus(connected) {
+            isBackendConnected = connected;
+            const pill = document.getElementById('backendStatusPill');
+            const dot = document.getElementById('backendStatusDot');
+            const text = document.getElementById('backendStatusText');
+            const btnSyncText = document.getElementById('syncDbBtnText');
+            
+            if (connected) {
+                if (pill) {
+                    pill.className = 'offline-status-pill connected';
+                    pill.title = 'Connected to PostgreSQL on port 8080. Live synchronized with CRM Dashboard 5173.';
+                }
+                if (text) text.innerText = '● Connected to PostgreSQL (Live Backend)';
+                if (btnSyncText) btnSyncText.innerText = 'Synced with DB';
+            } else {
+                if (pill) {
+                    pill.className = 'offline-status-pill offline';
+                    pill.title = 'Spring Boot backend is not running. Using local database. Run Start-Backend.bat to sync with PostgreSQL & 5173.';
+                }
+                if (text) text.innerText = '● Offline Mode (Local Database)';
+                if (btnSyncText) btnSyncText.innerText = 'Sync PostgreSQL';
+            }
+        }
+
+        // Fetch institutes from PostgreSQL via Spring Boot
+        async function fetchInstitutesFromBackend(silent = false) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/institutes`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+                const json = await res.json();
+                
+                if (json.success && Array.isArray(json.data)) {
+                    updateBackendStatus(true);
+                    const backendList = json.data;
+                    
+                    // Map backend institutes to desktop format
+                    const mappedList = backendList.map(inst => ({
+                        id: inst.instituteId,
+                        name: inst.instituteName,
+                        street: inst.streetAddress || '',
+                        village: inst.village || '',
+                        taluka: inst.taluka || '',
+                        district: inst.district || '',
+                        state: inst.state || 'Maharashtra',
+                        pincode: inst.pinCode || '',
+                        contacts: inst.notes && inst.notes.includes('Contact:') ? inst.notes.split('Contact:')[1].trim() : '',
+                        refBy: inst.referenceBy || '',
+                        refFrom: inst.referenceFrom || 'Existing Institute',
+                        branches: inst.branchCount || 1,
+                        priority: inst.priority || 'Medium',
+                        assignedTo: inst.assignedEmployeeName || 'Amit Patil',
+                        leadStatus: inst.leadStatus || 'New',
+                        nextFollowup: inst.nextFollowUpAt || '',
+                        notes: inst.notes || '',
+                        city: [inst.village, inst.taluka, inst.district].filter(Boolean).join(', ') || inst.state || 'Maharashtra',
+                        synced: true,
+                        createdAt: inst.createdAt || new Date().toISOString()
+                    }));
+
+                    // Check if we have unsynced local institutes (e.g. created while backend was offline)
+                    const localList = getStore('institutes', []);
+                    const unsyncedLocals = localList.filter(l => l.synced === false);
+
+                    if (unsyncedLocals.length > 0) {
+                        for (const un of unsyncedLocals) {
+                            await pushInstituteToBackend(un, true);
+                        }
+                        // Re-fetch after batch push
+                        const refetchRes = await fetch(`${API_BASE_URL}/institutes`);
+                        const refetchJson = await refetchRes.json();
+                        if (refetchJson.success && Array.isArray(refetchJson.data)) {
+                            const updatedList = refetchJson.data.map(inst => ({
+                                id: inst.instituteId,
+                                name: inst.instituteName,
+                                street: inst.streetAddress || '',
+                                village: inst.village || '',
+                                taluka: inst.taluka || '',
+                                district: inst.district || '',
+                                state: inst.state || 'Maharashtra',
+                                pincode: inst.pinCode || '',
+                                contacts: inst.notes && inst.notes.includes('Contact:') ? inst.notes.split('Contact:')[1].trim() : '',
+                                refBy: inst.referenceBy || '',
+                                refFrom: inst.referenceFrom || 'Existing Institute',
+                                branches: inst.branchCount || 1,
+                                priority: inst.priority || 'Medium',
+                                assignedTo: inst.assignedEmployeeName || 'Amit Patil',
+                                leadStatus: inst.leadStatus || 'New',
+                                nextFollowup: inst.nextFollowUpAt || '',
+                                notes: inst.notes || '',
+                                city: [inst.village, inst.taluka, inst.district].filter(Boolean).join(', ') || inst.state || 'Maharashtra',
+                                synced: true,
+                                createdAt: inst.createdAt || new Date().toISOString()
+                            }));
+                            setStore('institutes', updatedList);
+                            renderAllViews();
+                        }
+                    } else if (mappedList.length > 0) {
+                        // Also sync activities feed for any new institutes added via 5173 or DB
+                        const existingActivities = getStore('activities', []);
+                        mappedList.forEach(m => {
+                            const actTitle = `New institute registered: ${m.name}`;
+                            if (!existingActivities.some(a => a.title === actTitle)) {
+                                existingActivities.unshift({
+                                    id: 'act_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                                    type: 'visit',
+                                    title: actTitle,
+                                    meta: `${m.city || 'Maharashtra'} • Lead: ${m.leadStatus} • Assigned: ${m.assignedTo}`,
+                                    status: 'completed',
+                                    timestamp: m.createdAt || new Date().toISOString()
+                                });
+                                if (m.nextFollowup) {
+                                    existingActivities.unshift({
+                                        id: 'act_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                                        type: 'clock',
+                                        title: `Follow-up scheduled: ${m.name}`,
+                                        meta: `Assigned to ${m.assignedTo} • Due: ${(m.nextFollowup || '').replace('T', ' ')}`,
+                                        status: 'pending',
+                                        timestamp: m.createdAt || new Date().toISOString()
+                                    });
+                                }
+                            }
+                        });
+                        const previousCount = (getStore('institutes', []) || []).length;
+                        mappedList.sort((a, b) => (b.id || 0) - (a.id || 0));
+                        setStore('activities', existingActivities);
+                        setStore('institutes', mappedList);
+                        renderAllViews();
+                        if (mappedList.length > previousCount && previousCount > 0) {
+                            showToast(`✓ New institute received from 5173 Dashboard! (Total: ${mappedList.length})`);
+                        }
+                    }
+                    if (!silent) {
+                        showToast(`✓ Synchronized with PostgreSQL (${backendList.length} institutes live)`);
+                    }
+                    return true;
+                }
+            } catch (err) {
+                console.warn("Backend not reachable:", err);
+                updateBackendStatus(false);
+                if (!silent) {
+                    showToast("Backend offline: Run Start-Backend.bat to sync with PostgreSQL");
+                }
+                return false;
+            }
+        }
+
+        // Push a single institute to PostgreSQL via backend
+        async function pushInstituteToBackend(inst, isBatch = false) {
+            const payload = {
+                instituteName: inst.name,
+                streetAddress: inst.street || '',
+                village: inst.village || '',
+                taluka: inst.taluka || '',
+                district: inst.district || '',
+                state: inst.state || 'Maharashtra',
+                pinCode: (inst.pincode && inst.pincode.length === 6) ? inst.pincode : null,
+                branchCount: (inst.branches && parseInt(inst.branches) >= 1) ? parseInt(inst.branches) : 1,
+                referenceBy: inst.refBy || '',
+                referenceFrom: mapReferenceFromToBackend(inst.refFrom),
+                leadStatus: mapLeadStatusToBackend(inst.leadStatus),
+                priority: mapPriorityToBackend(inst.priority),
+                nextFollowUpAt: inst.nextFollowup ? new Date(inst.nextFollowup).toISOString() : null,
+                notes: (inst.notes ? `${inst.notes} ${inst.contacts ? `| Contact: ${inst.contacts}` : ''}` : (inst.contacts ? `Contact: ${inst.contacts}` : '')).trim(),
+                active: true
+            };
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/institutes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.data) {
+                        inst.id = data.data.instituteId;
+                        inst.synced = true;
+                        
+                        // Update in local store
+                        const curList = getStore('institutes', []);
+                        const matchIdx = curList.findIndex(i => i.name === inst.name);
+                        if (matchIdx !== -1) {
+                            curList[matchIdx].id = data.data.instituteId;
+                            curList[matchIdx].synced = true;
+                            setStore('institutes', curList);
+                        }
+
+                        updateBackendStatus(true);
+                        if (!isBatch) {
+                            showToast(`✓ Saved to PostgreSQL & Live on Dashboard 5173!`);
+                        }
+                        return true;
+                    }
+                } else {
+                    const errData = await res.json().catch(() => null);
+                    console.warn("Backend rejected institute creation:", res.status, errData);
+                }
+            } catch (e) {
+                console.warn("Failed to push institute to backend:", e);
+                inst.synced = false;
+                updateBackendStatus(false);
+            }
+            return false;
+        }
+
+        // Full check and sync
+        async function checkAndSyncBackend(manual = false) {
+            const btnSyncText = document.getElementById('syncDbBtnText');
+            if (btnSyncText) btnSyncText.innerText = 'Syncing...';
+            
+            const success = await fetchInstitutesFromBackend(!manual);
+            if (manual && success) {
+                showToast("✓ Successfully connected & synchronized with PostgreSQL!");
+            }
+        }
+
+        // ================= 4.6. TWO-WAY SYNC WITH CRM DASHBOARD 5173 =================
+        function syncTo5173Dashboard(inst, nextFollowup, assignedTo, notes) {
+            try {
+                let customers5173 = [];
+                const rawCust = localStorage.getItem('crm_saved_customers');
+                if (rawCust) {
+                    try { customers5173 = JSON.parse(rawCust) || []; } catch(e) {}
+                }
+                
+                const exists = customers5173.some(c => (c.name || '').toLowerCase() === (inst.name || '').toLowerCase());
+                if (!exists) {
+                    customers5173.unshift({
+                        id: inst.id || Date.now(),
+                        name: inst.name,
+                        company: inst.name,
+                        phone: (inst.contacts && inst.contacts.match(/\b[0-9]{10}\b/) ? inst.contacts.match(/\b[0-9]{10}\b/)[0] : ''),
+                        street: inst.street || '',
+                        village: inst.village || '',
+                        taluka: inst.taluka || '',
+                        district: inst.district || '',
+                        state: inst.state || 'Maharashtra',
+                        pin: inst.pincode || '',
+                        contacts: inst.contacts || '',
+                        referenceBy: inst.refBy || '',
+                        referenceFrom: inst.refFrom || 'Existing Institute',
+                        branchCount: inst.branches || '1',
+                        priority: inst.priority || 'High',
+                        owner: inst.assignedTo || assignedTo || 'Amit Patil',
+                        status: inst.leadStatus || 'New',
+                        followupDate: inst.nextFollowup || nextFollowup || '',
+                        notes: inst.notes || notes || ''
+                    });
+                    localStorage.setItem('crm_saved_customers', JSON.stringify(customers5173));
+                }
+
+                if (nextFollowup || inst.nextFollowup) {
+                    let followups5173 = [];
+                    const rawF = localStorage.getItem('crm_saved_followups');
+                    if (rawF) {
+                        try { followups5173 = JSON.parse(rawF) || []; } catch(e) {}
+                    }
+                    const fDate = inst.nextFollowup || nextFollowup;
+                    const fExists = followups5173.some(f => (f.customer || '').toLowerCase() === (inst.name || '').toLowerCase());
+                    if (!fExists) {
+                        followups5173.unshift({
+                            id: Date.now(),
+                            customer: inst.name,
+                            date: fDate,
+                            owner: inst.assignedTo || assignedTo || 'Amit Patil',
+                            status: 'Upcoming',
+                            notes: notes || 'Scheduled follow-up'
+                        });
+                        localStorage.setItem('crm_saved_followups', JSON.stringify(followups5173));
+                    }
+                }
+            } catch (err) {
+                console.warn("Failed to sync to 5173 dashboard storage:", err);
+            }
+        }
+
+        function syncTwoWayWith5173() {
+            try {
+                let listLocal = getStore('institutes', []);
+                let list5173 = [];
+                const raw5173 = localStorage.getItem('crm_saved_customers');
+                if (raw5173) {
+                    try { list5173 = JSON.parse(raw5173) || []; } catch(e) {}
+                }
+
+                let changed5173 = false;
+                let changedLocal = false;
+
+                // Push any local institutes (like xyz.xyz.xyz) to 5173
+                listLocal.forEach(loc => {
+                    if (loc && loc.name && !list5173.some(c => (c.name || '').toLowerCase() === loc.name.toLowerCase())) {
+                        list5173.unshift({
+                            id: loc.id || Date.now(),
+                            name: loc.name,
+                            company: loc.name,
+                            phone: (loc.contacts && loc.contacts.match(/\b[0-9]{10}\b/) ? loc.contacts.match(/\b[0-9]{10}\b/)[0] : ''),
+                            street: loc.street || '',
+                            village: loc.village || '',
+                            taluka: loc.taluka || '',
+                            district: loc.district || '',
+                            state: loc.state || 'Maharashtra',
+                            pin: loc.pincode || '',
+                            contacts: loc.contacts || '',
+                            referenceBy: loc.refBy || '',
+                            referenceFrom: loc.refFrom || 'Existing Institute',
+                            branchCount: loc.branches || '1',
+                            priority: loc.priority || 'High',
+                            owner: loc.assignedTo || 'Amit Patil',
+                            status: loc.leadStatus || 'New',
+                            followupDate: loc.nextFollowup || '',
+                            notes: loc.notes || ''
+                        });
+                        changed5173 = true;
+                    }
+                });
+
+                // Pull any 5173 customers to local
+                list5173.forEach(c => {
+                    if (c && c.name && !listLocal.some(loc => (loc.name || '').toLowerCase() === c.name.toLowerCase())) {
+                        listLocal.unshift({
+                            id: c.id || Date.now(),
+                            name: c.name,
+                            street: c.street || '',
+                            village: c.village || '',
+                            taluka: c.taluka || '',
+                            district: c.district || '',
+                            state: c.state || 'Maharashtra',
+                            pincode: c.pin || '',
+                            contacts: c.contacts || '',
+                            refBy: c.referenceBy || '',
+                            refFrom: c.referenceFrom || 'Existing Institute',
+                            branches: c.branchCount || 1,
+                            priority: c.priority || 'Medium',
+                            assignedTo: c.owner || 'Amit Patil',
+                            leadStatus: c.status || 'New',
+                            nextFollowup: c.followupDate || '',
+                            notes: c.notes || '',
+                            city: [c.village, c.taluka, c.district].filter(Boolean).join(', ') || c.state || 'Maharashtra',
+                            synced: false,
+                            createdAt: new Date().toISOString()
+                        });
+                        changedLocal = true;
+                    }
+                });
+
+                if (changed5173) {
+                    localStorage.setItem('crm_saved_customers', JSON.stringify(list5173));
+                }
+                if (changedLocal) {
+                    setStore('institutes', listLocal);
+                }
+            } catch(e) {
+                console.warn("Two-way sync error:", e);
+            }
+        }
+
+        // 5. Actions: Add Institute, Call, Visit, Follow-up
+        function saveInstitute(e) {
+            e.preventDefault();
+            const name = document.getElementById('instName').value.trim();
+            if (!name) return;
+
+            const street = document.getElementById('instStreet').value.trim();
+            const village = document.getElementById('instVillage').value.trim();
+            const taluka = document.getElementById('instTaluka').value.trim();
+            const district = document.getElementById('instDistrict').value.trim();
+            const state = document.getElementById('instState').value.trim();
+            const pincode = document.getElementById('instPincode').value.trim();
+            const contacts = document.getElementById('instContacts').value.trim();
+            const refBy = document.getElementById('instRefBy').value.trim();
+            const refFrom = document.getElementById('instRefFrom').value;
+            const branches = document.getElementById('instBranches').value;
+            const priority = document.getElementById('instPriority').value;
+            const assignedTo = document.getElementById('instAssignedEmp').value;
+            const leadStatus = document.getElementById('instLeadStatus').value;
+            const nextFollowup = document.getElementById('instNextFollowup').value;
+            const notes = document.getElementById('instNotes').value.trim();
+
+            const locationStr = [village, taluka, district].filter(Boolean).join(', ') || state || 'Maharashtra';
+
+            const newInstitute = {
+                id: Date.now(),
+                name,
+                street,
+                village,
+                taluka,
+                district,
+                state,
+                pincode,
+                contacts,
+                refBy,
+                refFrom,
+                branches,
+                priority,
+                assignedTo,
+                leadStatus,
+                nextFollowup,
+                notes,
+                city: locationStr,
+                synced: false,
+                createdAt: new Date().toISOString()
+            };
+
+            const list = getStore('institutes', []);
+            list.unshift(newInstitute);
+            setStore('institutes', list);
+
+            // Sync with 5173 Web Dashboard storage
+            syncTo5173Dashboard(newInstitute, nextFollowup, assignedTo, notes);
+
+            // Immediately push to PostgreSQL via backend
+            pushInstituteToBackend(newInstitute);
+
+            // If follow-up date provided, add to pending follow-ups
+            if (nextFollowup) {
+                let curF = parseInt(document.getElementById('statFollowups').innerText) || 5;
+                document.getElementById('statFollowups').innerText = curF + 1;
+                document.getElementById('sidebarFollowupCount').innerText = curF + 1;
+                addActivity('clock', `Follow-up scheduled: ${name}`, `Assigned to ${assignedTo} • Due: ${nextFollowup.replace('T', ' ')}`, 'pending');
+            }
+
+            addActivity('visit', `New institute registered: ${name}`, `${locationStr} • Lead: ${leadStatus} • Assigned: ${assignedTo}`, 'completed');
+            
+            closeModal('modalAddInstitute');
+            renderAllViews();
+            showToast(`Institute "${name}" saved! Syncing with PostgreSQL...`);
+
+            // Clear inputs
+            ['instName', 'instStreet', 'instVillage', 'instTaluka', 'instDistrict', 'instPincode', 'instContacts', 'instRefBy', 'instBranches', 'instNextFollowup', 'instNotes'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            document.getElementById('instRefFrom').selectedIndex = 0;
+            document.getElementById('instPriority').value = 'High';
+            document.getElementById('instAssignedEmp').selectedIndex = 0;
+            document.getElementById('instLeadStatus').selectedIndex = 0;
+        }
+
+        function populateCustomerDropdowns() {
+            const institutes = getStore('institutes', []);
+            const selects = ['callCustomer', 'visitCustomer', 'followupCustomer'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const currentVal = el.value;
+                el.innerHTML = '<option value="">Select Institute / Customer</option>';
+                institutes.forEach(inst => {
+                    const opt = document.createElement('option');
+                    opt.value = inst.name;
+                    opt.textContent = `${inst.name} (${inst.city || inst.district || 'Maharashtra'})`;
+                    el.appendChild(opt);
+                });
+                if (currentVal) el.value = currentVal;
+            });
+        }
+
+        function saveCall(e) {
+            e.preventDefault();
+            const customer = document.getElementById('callCustomer').value;
+            if (!customer) {
+                alert("Please select a customer / institute!");
+                return;
+            }
+
+            const callType = document.getElementById('callType').value;
+            const callDateTime = document.getElementById('callDateTime').value;
+            const employee = document.getElementById('callEmployee').value;
+            const contactPerson = document.getElementById('callContactPerson').value.trim();
+            const contactNumber = document.getElementById('callContactNumber').value.trim();
+            const outcome = document.getElementById('callOutcome').value;
+            const nextFollowup = document.getElementById('callNextFollowup').value;
+            const notes = document.getElementById('callNotes').value.trim();
+
+            const callRecord = {
+                id: Date.now(),
+                customer,
+                callType,
+                callDateTime,
+                employee,
+                contactPerson,
+                contactNumber,
+                outcome,
+                nextFollowup,
+                notes,
+                createdAt: new Date().toISOString()
+            };
+
+            const callsList = getStore('calls', []);
+            callsList.unshift(callRecord);
+            setStore('calls', callsList);
+
+            let curCalls = parseInt(document.getElementById('statCalls').innerText) || 0;
+            document.getElementById('statCalls').innerText = curCalls + 1;
+
+            if (nextFollowup) {
+                let curF = parseInt(document.getElementById('statFollowups').innerText) || 5;
+                document.getElementById('statFollowups').innerText = curF + 1;
+                document.getElementById('sidebarFollowupCount').innerText = curF + 1;
+                addActivity('clock', `Follow-up from call: ${customer}`, `Assigned to ${employee} • Due: ${nextFollowup.replace('T', ' ')}`, 'pending');
+            }
+
+            addActivity('call', `Call logged for ${customer} (${outcome})`, `${callType} call by ${employee} • Contact: ${contactPerson || 'Representative'}`, 'completed');
+            closeModal('modalLogCall');
+            renderAllViews();
+            showToast(`Call record saved for ${customer}!`);
+
+            // Clear inputs
+            document.getElementById('callCustomer').selectedIndex = 0;
+            document.getElementById('callDateTime').value = '';
+            document.getElementById('callContactPerson').value = '';
+            document.getElementById('callContactNumber').value = '';
+            document.getElementById('callNextFollowup').value = '';
+            document.getElementById('callNotes').value = '';
+        }
+
+        function saveVisit(e) {
+            e.preventDefault();
+            const customer = document.getElementById('visitCustomer').value;
+            if (!customer) {
+                alert("Please select a customer / institute!");
+                return;
+            }
+
+            const visitDateTime = document.getElementById('visitDateTime').value;
+            const contactPerson = document.getElementById('visitContactPerson').value.trim();
+            const contactNumber = document.getElementById('visitContactNumber').value.trim();
+            const assignedEmployee = document.getElementById('visitAssignedEmployee').value;
+            const status = document.getElementById('visitStatus').value;
+            const purpose = document.getElementById('visitPurpose').value.trim();
+            const notes = document.getElementById('visitNotes').value.trim();
+
+            const visitRecord = {
+                id: Date.now(),
+                customer,
+                visitDateTime,
+                contactPerson,
+                contactNumber,
+                assignedEmployee,
+                status,
+                purpose,
+                notes,
+                createdAt: new Date().toISOString()
+            };
+
+            const visitsList = getStore('visits', []);
+            visitsList.unshift(visitRecord);
+            setStore('visits', visitsList);
+
+            let curVisits = parseInt(document.getElementById('statVisits').innerText) || 0;
+            document.getElementById('statVisits').innerText = curVisits + 1;
+
+            addActivity('visit', `Campus visit to ${customer}`, `${purpose || 'Meeting'} • By ${assignedEmployee} • Status: ${status}`, status.toLowerCase() === 'completed' ? 'completed' : 'scheduled');
+            closeModal('modalLogVisit');
+            renderAllViews();
+            showToast(`Visit recorded for ${customer}!`);
+
+            // Clear inputs
+            document.getElementById('visitCustomer').selectedIndex = 0;
+            document.getElementById('visitDateTime').value = '';
+            document.getElementById('visitContactPerson').value = '';
+            document.getElementById('visitContactNumber').value = '';
+            document.getElementById('visitPurpose').value = '';
+            document.getElementById('visitNotes').value = '';
+        }
+
+        function saveFollowup(e) {
+            e.preventDefault();
+            const customer = document.getElementById('followupCustomer').value;
+            if (!customer) {
+                alert("Please select a customer / institute!");
+                return;
+            }
+
+            const followupDateTime = document.getElementById('followupDateTime').value;
+            const assignedEmployee = document.getElementById('followupAssignedEmployee').value;
+            const notes = document.getElementById('followupNotes').value.trim();
+
+            const followupRecord = {
+                id: Date.now(),
+                customer,
+                followupDateTime,
+                assignedEmployee,
+                notes,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            const followupsList = getStore('followups', []);
+            followupsList.unshift(followupRecord);
+            setStore('followups', followupsList);
+
+            let curF = parseInt(document.getElementById('statFollowups').innerText) || 5;
+            document.getElementById('statFollowups').innerText = curF + 1;
+            document.getElementById('sidebarFollowupCount').innerText = curF + 1;
+
+            addActivity('clock', `Follow-up scheduled: ${customer}`, `Assigned to ${assignedEmployee} • Due: ${followupDateTime.replace('T', ' ')}`, 'pending');
+            closeModal('modalAddFollowup');
+            renderAllViews();
+            showToast(`Follow-up scheduled for ${customer}!`);
+
+            // Clear inputs
+            document.getElementById('followupCustomer').selectedIndex = 0;
+            document.getElementById('followupDateTime').value = '';
+            document.getElementById('followupNotes').value = '';
+        }
+
+        let isFeedExpanded = false;
+        function toggleFeedInline() {
+            isFeedExpanded = !isFeedExpanded;
+            renderDashboard();
+        }
+
+        function openAllActivitiesModal() {
+            renderAllActivitiesModalList();
+            openModal('modalAllActivities');
+        }
+
+        function renderAllActivitiesModalList() {
+            const activities = getStore('activities', []);
+            const search = (document.getElementById('searchAllActivitiesInput')?.value || '').toLowerCase();
+            const typeFilter = document.getElementById('filterActivityTypeSelect')?.value || '';
+            const container = document.getElementById('allActivitiesFullList');
+            const badge = document.getElementById('allActivitiesCountBadge');
+            if (!container) return;
+
+            const filtered = activities.filter(act => {
+                const matchesSearch = (act.title || '').toLowerCase().includes(search) || 
+                                      (act.meta || '').toLowerCase().includes(search);
+                const matchesType = !typeFilter || act.type === typeFilter;
+                return matchesSearch && matchesType;
+            });
+
+            if (badge) badge.innerText = `${filtered.length} activities`;
+            container.innerHTML = '';
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:35px; color:#94a3b8; font-size:13px;">No activities found matching criteria.</div>';
+                return;
+            }
+
+            filtered.forEach(act => {
+                const iconClass = act.type === 'call' ? 'phone' : (act.type === 'visit' ? 'visit' : 'clock');
+                const svgPath = act.type === 'call' 
+                    ? '<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"></path>'
+                    : (act.type === 'visit' 
+                        ? '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle>'
+                        : '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>');
+
+                const row = document.createElement('div');
+                row.className = 'activity-row';
+                row.style.padding = '10px 14px';
+                row.style.marginBottom = '6px';
+                row.style.background = '#f8fafc';
+                row.style.border = '1px solid #e2e8f0';
+                row.style.borderRadius = '8px';
+                row.innerHTML = `
+                    <div class="act-left">
+                        <div class="act-icon ${iconClass}">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${svgPath}</svg>
+                        </div>
+                        <div class="act-texts">
+                            <h5 style="font-size:13px; font-weight:600; color:#0f172a;">${act.title}</h5>
+                            <p style="font-size:11.5px; color:#64748b;">${act.meta} ${act.time ? `<span style="color:#94a3b8; margin-left:6px;">• ${act.time}</span>` : ''}</p>
+                        </div>
+                    </div>
+                    <span class="status-pill ${act.status || 'completed'}">${(act.status || 'COMPLETED').toUpperCase()}</span>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addActivity(type, title, meta, status) {
+            const activities = getStore('activities', []);
+            activities.unshift({ 
+                type, 
+                title, 
+                meta, 
+                status,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString()
+            });
+            setStore('activities', activities);
+            renderDashboard();
+        }
+
+        // 6. Login Logs Modal
+        function showLoginLogs() {
+            const logs = getStore('login_logs', []);
+            const container = document.getElementById('loginLogsContainer');
+            container.innerHTML = '';
+            logs.slice(0, 15).forEach(l => {
+                const item = document.createElement('div');
+                item.style.padding = '8px 12px';
+                item.style.background = '#f8fafc';
+                item.style.border = '1px solid #e2e8f0';
+                item.style.borderRadius = '6px';
+                item.style.fontSize = '12px';
+                item.innerHTML = `<strong>${l.user}</strong> &bull; <span style="color:#2563eb;">${l.action}</span> &bull; <span style="color:#64748b;">${l.time}</span> (${l.ip})`;
+                container.appendChild(item);
+            });
+            openModal('modalLoginLogs');
+        }
+
+        function addAuditLog(userName, action) {
+            const logs = getStore('login_logs', []);
+            logs.unshift({ user: userName, action, time: new Date().toLocaleString(), ip: '127.0.0.1' });
+            setStore('login_logs', logs);
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            populateCustomerDropdowns();
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        
+        // Multi-view navigation and rendering
+                function switchNav(tabKey, el) {
+            document.querySelectorAll('.sidebar-menu .nav-item').forEach(item => item.classList.remove('active'));
+
+            const viewMap = {
+                'tab-dashboard': { id: 'view-dashboard', title: 'Dashboard', navIndex: 0 },
+                'tab-institutes': { id: 'view-institutes', title: 'Institutes', navIndex: 1 },
+                'tab-calls': { id: 'view-calls', title: 'Call Logs', navIndex: 2 },
+                'tab-visits': { id: 'view-visits', title: 'Visits', navIndex: 3 },
+                'tab-followups': { id: 'view-followups', title: 'Follow-ups', navIndex: 4 },
+                'tab-team': { id: 'view-dashboard', title: 'Employees', navIndex: 5 }
+            };
+
+            const target = viewMap[tabKey] || viewMap['tab-dashboard'];
+
+            // Highlight nav item
+            if (el) {
+                el.classList.add('active');
+            } else {
+                const navItems = document.querySelectorAll('.sidebar-menu .nav-item');
+                if (navItems[target.navIndex]) {
+                    navItems[target.navIndex].classList.add('active');
+                }
+            }
+
+            // Hide all tab views
+            document.querySelectorAll('.workspace-tab-view').forEach(view => {
+                view.style.display = 'none';
+                view.classList.remove('active');
+            });
+
+            const activeView = document.getElementById(target.id);
+            if (activeView) {
+                activeView.style.display = 'flex';
+                activeView.classList.add('active');
+            }
+
+            document.getElementById('currentBreadcrumb').innerText = target.title;
+            const mainWs = document.querySelector('.main-workspace');
+            if (mainWs) mainWs.scrollTop = 0;
+            const appCont = document.querySelector('.app-container');
+            if (appCont) appCont.scrollLeft = 0;
+            renderAllViews();
+            showToast(`Switched to ${target.title}`);
+        }
+
+        function renderAllViews() {
+            renderDashboard();
+            renderInstitutesTable();
+            renderCallsTable();
+            renderVisitsTable();
+            renderFollowupsView();
+        }
+
+        function renderInstitutesTable() {
+            const list = getStore('institutes', []);
+            const filterText = (document.getElementById('searchInstitutesInput')?.value || '').toLowerCase();
+            const tbody = document.getElementById('institutesTableBody');
+            const badge = document.getElementById('instTableCountBadge');
+            if (!tbody) return;
+
+            const filtered = list.filter(item => 
+                (item.name || '').toLowerCase().includes(filterText) ||
+                (item.city || '').toLowerCase().includes(filterText) ||
+                (item.district || '').toLowerCase().includes(filterText) ||
+                (item.taluka || '').toLowerCase().includes(filterText)
+            );
+
+            if (badge) badge.innerText = `${filtered.length} institutes`;
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-table-state">No institutes found matching your query.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(inst => {
+                const tr = document.createElement('tr');
+                const priorityClass = (inst.priority || 'High').toLowerCase() === 'high' ? 'danger' : 'warning';
+                tr.innerHTML = `
+                    <td>
+                        <strong style="color:#0f172a; font-size:13.5px;">${inst.name}</strong>
+                        ${inst.contacts ? `<br><small style="color:#64748b;">${(inst.contacts || '').split(/\r?\n/)[0]}</small>` : ''}
+                    </td>
+                    <td>${inst.city || inst.district || inst.village || 'Maharashtra'}</td>
+                    <td>${inst.assignedTo || 'Unassigned'}</td>
+                    <td><span class="status-pill ${priorityClass}" style="font-size:11px;">${inst.priority || 'High'}</span></td>
+                    <td><span class="status-pill scheduled" style="font-size:11px;">${inst.leadStatus || 'New'}</span></td>
+                    <td>
+                        <button class="f-btn-action" onclick="openLogCallFor('${inst.name}')">Call</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderCallsTable() {
+            const list = getStore('calls', []);
+            const filterText = (document.getElementById('searchCallsInput')?.value || '').toLowerCase();
+            const filterOutcome = document.getElementById('filterCallsOutcome')?.value || '';
+            const tbody = document.getElementById('callsTableBody');
+            const badge = document.getElementById('callTableCountBadge');
+            if (!tbody) return;
+
+            const filtered = list.filter(item => {
+                const matchText = (item.customer || '').toLowerCase().includes(filterText) || (item.employee || '').toLowerCase().includes(filterText);
+                const matchOutcome = !filterOutcome || item.outcome === filterOutcome;
+                return matchText && matchOutcome;
+            });
+
+            if (badge) badge.innerText = `${filtered.length} logs`;
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-table-state">No call logs found.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong style="color:#0f172a;">${c.customer}</strong><br><small style="color:#64748b;">Called by: ${c.employee}</small></td>
+                    <td><span class="status-pill scheduled">${c.callType || 'Outgoing'}</span></td>
+                    <td>${c.callDateTime ? c.callDateTime.replace('T', ' ') : 'Today'}</td>
+                    <td><span class="status-pill completed">${c.outcome}</span></td>
+                    <td style="max-width:220px; color:#475569;">${c.notes || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderVisitsTable() {
+            const list = getStore('visits', []);
+            const filterText = (document.getElementById('searchVisitsInput')?.value || '').toLowerCase();
+            const filterStatus = (document.getElementById('filterVisitsStatus')?.value || '').toLowerCase();
+            const tbody = document.getElementById('visitsTableBody');
+            const badge = document.getElementById('visitTableCountBadge');
+            if (!tbody) return;
+
+            const filtered = list.filter(item => {
+                const matchText = (item.customer || '').toLowerCase().includes(filterText) || (item.assignedEmployee || '').toLowerCase().includes(filterText);
+                const matchStatus = !filterStatus || (item.status || '').toLowerCase() === filterStatus;
+                return matchText && matchStatus;
+            });
+
+            if (badge) badge.innerText = `${filtered.length} visits`;
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-table-state">No visit records found.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(v => {
+                const tr = document.createElement('tr');
+                const isCompleted = (v.status || '').toLowerCase() === 'completed';
+                tr.innerHTML = `
+                    <td><strong style="color:#0f172a;">${v.customer}</strong><br><small style="color:#64748b;">${v.purpose || 'Meeting'}</small></td>
+                    <td>${v.visitDateTime ? v.visitDateTime.replace('T', ' ') : 'Today'}</td>
+                    <td>${v.assignedEmployee || 'Unassigned'}</td>
+                    <td><span class="status-pill ${isCompleted ? 'completed' : 'scheduled'}">${v.status || 'Scheduled'}</span></td>
+                    <td>
+                        <button class="f-btn-action complete" onclick="markVisitDone(${v.id})">Done</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderFollowupsView() {
+            const list = getStore('followups', []);
+            const filterText = (document.getElementById('searchFollowupsInput')?.value || '').toLowerCase();
+            const filterStatus = (document.getElementById('filterFollowupsStatus')?.value || '').toLowerCase();
+            const container = document.getElementById('followupsListContainer');
+            if (!container) return;
+
+            const filtered = list.filter(f => {
+                const matchText = (f.customer || '').toLowerCase().includes(filterText) || (f.assignedEmployee || '').toLowerCase().includes(filterText);
+                const matchStatus = !filterStatus || (f.status || 'upcoming').toLowerCase() === filterStatus;
+                return matchText && matchStatus;
+            });
+
+            const upcomingCount = list.filter(f => (f.status || 'upcoming').toLowerCase() !== 'completed').length;
+            if (document.getElementById('followupUpcoming')) {
+                document.getElementById('followupUpcoming').innerText = upcomingCount;
+            }
+            if (document.getElementById('statFollowups')) {
+                document.getElementById('statFollowups').innerText = upcomingCount;
+            }
+            if (document.getElementById('sidebarFollowupCount')) {
+                document.getElementById('sidebarFollowupCount').innerText = upcomingCount;
+            }
+
+            container.innerHTML = '';
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-table-state">No follow-ups found matching your query.</div>';
+                return;
+            }
+
+            filtered.forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'followup-item-card';
+                const isCompleted = f.status === 'completed';
+                const tagClass = isCompleted ? 'completed' : 'scheduled';
+                const tagText = isCompleted ? 'Completed' : 'Upcoming';
+                const displayTime = f.followupDateTime ? f.followupDateTime.replace('T', ' • ') : '19 Nov • 05:34 am';
+
+                card.innerHTML = `
+                    <div class="f-left-info">
+                        <div class="f-clock-avatar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <div>
+                            <div class="f-meta-title">
+                                <span>${f.customer}</span>
+                                <span class="status-pill ${tagClass}" style="font-size:11px;">${tagText}</span>
+                            </div>
+                            <div class="f-meta-sub">${displayTime} • ${f.assignedEmployee || 'Amit Patil'}</div>
+                            ${f.notes ? `<div class="f-notes-line">${f.notes}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="f-actions-group">
+                        ${!isCompleted ? `<button class="f-btn-action complete" onclick="completeFollowup(${f.id})">&#10003; Complete</button>` : ''}
+                        <button class="f-btn-action" onclick="openLogCallFor('${f.customer}')">Log call</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openLogCallFor(customerName) {
+            openModal('modalLogCall');
+            const select = document.getElementById('callCustomer');
+            if (select) {
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === customerName) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function completeFollowup(id) {
+            const list = getStore('followups', []);
+            const item = list.find(f => f.id === id);
+            if (item) {
+                item.status = 'completed';
+                setStore('followups', list);
+                renderFollowupsView();
+                showToast("Follow-up marked as completed!");
+            }
+        }
+
+        function markVisitDone(id) {
+            const list = getStore('visits', []);
+            const item = list.find(v => v.id === id);
+            if (item) {
+                item.status = 'Completed';
+                setStore('visits', list);
+                renderVisitsTable();
+                showToast("Visit marked as completed!");
+            }
+        }
+
+
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast-item';
+            toast.innerHTML = `<span>✓</span> <span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        }
+
+        function confirmExit() {
+            if (confirm("Do you want to minimize or close ConnectFlow CRM Desktop?")) {
+                window.close();
+            }
+        }
+
+        // Live Clock
+        setInterval(() => {
+            const d = new Date();
+            const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+            const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('liveClockDate').innerText = `${dateStr} • ${timeStr}`;
+        }, 1000);
+
+        // App Boot
+        window.addEventListener('DOMContentLoaded', () => {
+            initSeedData();
+            syncTwoWayWith5173();
+            renderAllViews();
+            checkSession();
+            checkAndSyncBackend(false);
+
+            // Background polling sync every 15 seconds
+            setInterval(() => {
+                syncTwoWayWith5173();
+                checkAndSyncBackend(false);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
