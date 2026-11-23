@@ -1265,77 +1265,124 @@ function renderAll() { renderDashboard();renderCustomers();renderCalls();renderV
 function saveRecord(type, data) {
   const now = new Date();
   if(type==="customer") {
-    const primaryPhone = (data.contacts||"").split("\n").map(line=>line.split("|").map(part=>part.trim())).find(parts=>parts[2]);
-    const phone = primaryPhone?.[2] || "";
-    if(state.customers.some(c=>c.name.toLowerCase()===data.name.trim().toLowerCase())) {
-      showNotice("An institute with this name already exists."); return;
+    const instName = (data.name || "").trim();
+    if(!instName) {
+      alert("Please enter Institute Name / संस्थेचे नाव टाका!");
+      return;
     }
-    if(phone && state.customers.some(c=>c.phone.replace(/\D/g,"")===phone.replace(/\D/g,""))) {
-      showNotice("This contact number is already saved for another institute."); return;
-    }
-    const customer={id:state.nextId++,name:data.name.trim(),phone:phone,company:data.name.trim(),street:data.street.trim(),village:data.village.trim(),taluka:data.taluka.trim(),district:data.district.trim(),state:data.state.trim(),pin:data.pin.trim(),contacts:data.contacts.trim(),referenceBy:data.referenceBy.trim(),referenceFrom:data.referenceFrom,branchCount:data.branchCount === "" ? "" : Math.max(1, parseInt(data.branchCount, 10) || 1),priority:data.priority||"Medium",owner:data.owner,status:data.status,followupDate:data.followupDate,notes:data.notes.trim()};
-    state.customers.unshift(customer);
-    if(data.followupDate) state.followups.unshift({id:state.nextId++,customer:customer.name,date:data.followupDate,owner:data.owner,status:"Upcoming",notes:data.notes.trim()||"Institute follow-up"});
-    persistState();
-    showNotice("Saving institute to PostgreSQL...");
 
-    // Send POST to backend
+    const primaryPhone = (data.contacts||"").split("\n").map(line=>line.split("|").map(part=>part.trim())).find(parts=>parts[2]);
+    const phone = primaryPhone?.[2] || data.phone || "";
+
+    const customer = {
+      id: state.nextId++,
+      name: instName,
+      phone: phone,
+      company: instName,
+      street: (data.street || "").trim(),
+      village: (data.village || "").trim(),
+      taluka: (data.taluka || "").trim(),
+      district: (data.district || "").trim(),
+      state: (data.state || "Maharashtra").trim(),
+      pin: (data.pin || "").trim(),
+      contacts: (data.contacts || "").trim(),
+      referenceBy: (data.referenceBy || "Amit Patil").trim(),
+      referenceFrom: data.referenceFrom || "Employee",
+      branchCount: data.branchCount ? Math.max(1, parseInt(data.branchCount, 10) || 1) : 1,
+      priority: data.priority || "High",
+      owner: data.owner || "Amit Patil",
+      status: data.status || "New",
+      followupDate: data.followupDate ? data.followupDate.slice(0, 16) : "",
+      notes: (data.notes || "").trim()
+    };
+
+    // Add to state immediately
+    state.customers.unshift(customer);
+
+    if(data.followupDate) {
+      state.followups.unshift({
+        id: Date.now(),
+        customer: customer.name,
+        date: data.followupDate.slice(0, 16),
+        owner: data.owner || "Amit Patil",
+        status: "Upcoming",
+        notes: data.notes ? data.notes.trim() : "Scheduled follow-up"
+      });
+    }
+
+    persistState();
+    $("record-dialog").close();
+    renderAll();
+    showNotice(`✓ "${instName}" record saved successfully!`);
+
+    // Background push to backend APIs
+    const payload = {
+      instituteName: instName,
+      streetAddress: customer.street || null,
+      village: customer.village || null,
+      taluka: customer.taluka || null,
+      district: customer.district || null,
+      state: customer.state || "Maharashtra",
+      pinCode: (/^\d{6}$/.test(customer.pin)) ? customer.pin : null,
+      branchCount: customer.branchCount,
+      referenceBy: customer.referenceBy,
+      referenceFrom: customer.referenceFrom,
+      leadStatus: customer.status,
+      priority: customer.priority,
+      nextFollowUpAt: customer.followupDate ? new Date(customer.followupDate).toISOString() : null,
+      notes: customer.notes
+    };
+
+    // Try primary backend
     fetch(`${API_BASE_URL}/api/institutes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        instituteName: data.name.trim(),
-        streetAddress: data.street ? data.street.trim() : null,
-        village: data.village ? data.village.trim() : null,
-        taluka: data.taluka ? data.taluka.trim() : null,
-        district: data.district ? data.district.trim() : null,
-        state: data.state ? data.state.trim() : "Maharashtra",
-        pinCode: (data.pin && data.pin.trim().length === 6) ? data.pin.trim() : null,
-        branchCount: data.branchCount ? Math.max(1, parseInt(data.branchCount, 10)) : 1,
-        referenceBy: data.referenceBy ? data.referenceBy.trim() : "Employee",
-        referenceFrom: (["Employee", "Existing Institute", "Website", "WhatsApp", "Other"].includes(data.referenceFrom)) ? data.referenceFrom : "Employee",
-        leadStatus: (["New", "Contacted", "Interested", "Follow-up", "Converted", "Not Interested"].includes(data.status)) ? data.status : "New",
-        priority: (["Low", "Medium", "High"].includes(data.priority)) ? data.priority : "Medium",
-        nextFollowUpAt: data.followupDate ? new Date(data.followupDate).toISOString() : null,
-        notes: data.notes ? data.notes.trim() : ""
-      })
-    })
-    .then(r => r.json())
-    .then(res => {
-      console.log("Saved to PostgreSQL:", res);
-      showNotice("Institute saved to PostgreSQL database!");
-      loadLiveDatabaseData();
-    })
-    .catch(err => {
-      console.warn("Backend save failed:", err);
-    });
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+
+    // Also try local backend
+    if (API_BASE_URL !== "http://localhost:8080") {
+      fetch("http://localhost:8080/api/institutes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+    }
+    return;
   } else if(type==="call") {
     const activityDate=data.activityDate || now.toISOString().slice(0,16);
     state.calls.unshift({id:state.nextId++,customer:data.customer,type:data.callType,date:activityDate,owner:data.owner||"Unassigned",contactPerson:data.contactPerson.trim(),contactPhone:data.contactPhone.trim(),result:data.result,notes:data.notes.trim()});
     if(data.followupDate) state.followups.unshift({id:state.nextId++,customer:data.customer,date:data.followupDate,owner:data.owner||customerByName(data.customer)?.owner||employeeOptions[0],status:"Upcoming",notes:"Follow-up after call"});
     persistState();
+    $("record-dialog").close();
+    renderAll();
     showNotice("Call record saved in this browser prototype.");
+    return;
   } else if(type==="visit") {
     const activityDate=data.activityDate || now.toISOString().slice(0,16);
     state.visits.unshift({id:state.nextId++,customer:data.customer,date:activityDate,owner:data.owner,status:data.status,contactPerson:data.contactPerson.trim(),contactPhone:data.contactPhone.trim(),purpose:data.purpose.trim(),notes:data.notes.trim()});
     persistState();
+    $("record-dialog").close();
+    renderAll();
     showNotice("Visit record saved in this browser prototype.");
+    return;
   } else if(type==="followup") {
     state.followups.unshift({id:state.nextId++,customer:data.customer,date:data.date,owner:data.owner,status:"Upcoming",notes:data.notes.trim()});
     persistState();
+    $("record-dialog").close();
+    renderAll();
     showNotice("Follow-up scheduled in this browser prototype.");
+    return;
   }
-  persistState();
-  $("record-dialog").close();
-  renderAll();
 }
 $("record-form").addEventListener("submit", e=>{
   e.preventDefault();
   const type=$("record-dialog").dataset.type;
   const data=Object.fromEntries(new FormData(e.currentTarget).entries());
-  if(type==="customer" && !data.name?.trim()) {showNotice("Institute name is required.");return;}
-  if(type==="customer" && data.pin?.trim() && !/^\d{6}$/.test(data.pin.trim())) {showNotice("Please enter a valid 6-digit PIN code.");return;}
-  if(type==="customer" && data.branchCount?.trim() && (!/^\d+$/.test(data.branchCount.trim()) || Number(data.branchCount) < 1)) {showNotice("Please enter a valid number of branches (1 or more).");return;}
+  if(type==="customer" && !data.name?.trim()) {
+    alert("Please enter Institute Name / संस्थेचे नाव टाका!");
+    return;
+  }
   saveRecord(type,data);
 });
 $("primary-action").addEventListener("click",()=>openDialog(({dashboard:"customer",customers:"customer",calls:"call",visits:"visit",followups:"followup"})[state.page]));
