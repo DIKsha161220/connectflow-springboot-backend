@@ -53,7 +53,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<ApiResponse<Void>> handleTypeMismatch() {
-        return ResponseEntity.badRequest().body(ApiResponse.failure("Invalid request parameter"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.failure("Resource not found"));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -65,6 +66,18 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiResponse<Void>> handleConflict(DataIntegrityViolationException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiResponse.failure("The request conflicts with existing data or database constraints"));
+    }
+
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    ResponseEntity<ApiResponse<Void>> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.failure("Endpoint not found: " + exception.getResourcePath()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.failure(exception.getMessage() != null ? exception.getMessage() : "Internal server error occurred"));
     }
 
 }

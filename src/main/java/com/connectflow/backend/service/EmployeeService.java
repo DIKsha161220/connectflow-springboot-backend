@@ -13,4 +13,6 @@ public interface EmployeeService {
     EmployeeResponse create(EmployeeRequest request, Long actorId);
 
     EmployeeResponse update(Long employeeId, EmployeeRequest request, Long actorId);
+
+    void delete(Long employeeId);
 }

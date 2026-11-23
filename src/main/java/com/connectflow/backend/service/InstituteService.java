@@ -15,4 +15,8 @@ public interface InstituteService {
     Institute requireVisibleEntity(Long instituteId, EmployeePrincipal actor);
 
     InstituteResponse create(InstituteRequest request, EmployeePrincipal actor);
+
+    InstituteResponse update(Long instituteId, InstituteRequest request, EmployeePrincipal actor);
+
+    void delete(Long instituteId, EmployeePrincipal actor);
 }

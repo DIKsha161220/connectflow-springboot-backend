@@ -16,7 +16,8 @@ public record InstituteRequest(
         @Size(max = 100) String taluka,
         @Size(max = 100) String district,
         @Size(max = 100) String state,
-        @Pattern(regexp = "^[0-9]{6}$") String pinCode,
+        @Pattern(regexp = "^(|[0-9]{6})$", message = "PIN code must be exactly 6 digits or empty")
+        String pinCode,
         @Min(1) Integer branchCount,
         @Size(max = 150) String referenceBy,
         @Size(max = 50) String referenceFrom,

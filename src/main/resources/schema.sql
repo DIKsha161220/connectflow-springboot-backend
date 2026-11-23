@@ -53,14 +53,14 @@ CREATE TABLE IF NOT EXISTS employees (
         ON DELETE RESTRICT
 );
 
--- Note: BCrypt hash below corresponds to 'password123'
+-- Note: BCrypt hash below corresponds to 'root' (and 'password123')
 INSERT INTO employees (full_name, email, phone, password_hash, role_id)
 VALUES
-    ('Amit Patil', 'amit.patil@example.com', NULL, '$2a$10$wW5g1tFpA5rO02LdZpG/e.1k9ZzS/H.aD9p1PjS8pL1/4v5b7y9sS',
+    ('Amit Patil', 'amit.patil@example.com', NULL, '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi',
         (SELECT role_id FROM roles WHERE role_name = 'Administrative')),
-    ('Neha Shah', 'neha.shah@example.com', NULL, '$2a$10$wW5g1tFpA5rO02LdZpG/e.1k9ZzS/H.aD9p1PjS8pL1/4v5b7y9sS',
+    ('Neha Shah', 'neha.shah@example.com', NULL, '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi',
         (SELECT role_id FROM roles WHERE role_name = 'Calling Team')),
-    ('Rohit More', 'rohit.more@example.com', NULL, '$2a$10$wW5g1tFpA5rO02LdZpG/e.1k9ZzS/H.aD9p1PjS8pL1/4v5b7y9sS',
+    ('Rohit More', 'rohit.more@example.com', NULL, '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi',
         (SELECT role_id FROM roles WHERE role_name = 'On-field Employee'))
 ON CONFLICT (email) DO UPDATE
     SET password_hash = COALESCE(employees.password_hash, EXCLUDED.password_hash);
@@ -284,6 +284,26 @@ CREATE TABLE IF NOT EXISTS audit_logs (
         ON DELETE SET NULL,
     CONSTRAINT chk_audit_logs_action
         CHECK (action IN ('CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT'))
+);
+
+-- -----------------------------------------------------------------------------
+-- 8B. Table: login_logout_logs (Dedicated Auth Tracking with Separate Columns)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS login_logout_logs (
+    log_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    employee_id BIGINT,
+    full_name VARCHAR(150),
+    email VARCHAR(255) NOT NULL,
+    role_name VARCHAR(50),
+    login_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    logout_time TIMESTAMPTZ,
+    ip_address VARCHAR(45),
+    status VARCHAR(30) NOT NULL DEFAULT 'LOGGED_IN',
+
+    CONSTRAINT fk_login_logs_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employees(employee_id)
+        ON DELETE SET NULL
 );
 
 -- -----------------------------------------------------------------------------

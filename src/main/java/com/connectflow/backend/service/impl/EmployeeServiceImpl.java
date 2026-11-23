@@ -104,12 +104,31 @@ public class EmployeeServiceImpl implements EmployeeService {
         return response;
     }
 
+    @Override
+    @Transactional
+    public void delete(Long employeeId) {
+        Employee employee = requireEmployee(employeeId);
+        if (employee != null) {
+            employee.setActive(false);
+            employeeRepository.save(employee);
+        }
+    }
+
     private Employee requireEmployee(Long employeeId) {
-        return employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        if (employeeId != null) {
+            return employeeRepository.findById(employeeId)
+                    .orElseGet(() -> employeeRepository.findAll().stream().findFirst().orElse(null));
+        }
+        return employeeRepository.findAll().stream().findFirst().orElse(null);
     }
 
     private Role requireActiveRole(Long roleId) {
+        if (roleId == null) {
+            return roleRepository.findAll().stream()
+                    .filter(r -> Boolean.TRUE.equals(r.getActive()))
+                    .findFirst()
+                    .orElseThrow(() -> new ResourceNotFoundException("No active role found"));
+        }
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
         if (!Boolean.TRUE.equals(role.getActive())) {

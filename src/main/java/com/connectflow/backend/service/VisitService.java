@@ -22,4 +22,6 @@ public interface VisitService {
             VisitStatus status,
             EmployeePrincipal actor,
             InetAddress ipAddress);
+
+    void delete(Long visitId, EmployeePrincipal actor);
 }

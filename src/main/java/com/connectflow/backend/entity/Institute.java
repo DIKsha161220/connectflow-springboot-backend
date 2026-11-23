@@ -88,16 +88,16 @@ public class Institute {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
-    @OneToMany(mappedBy = "institute")
+    @OneToMany(mappedBy = "institute", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private List<InstituteContact> contacts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "institute")
+    @OneToMany(mappedBy = "institute", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private List<CallLog> callLogs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "institute")
+    @OneToMany(mappedBy = "institute", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private List<Visit> visits = new ArrayList<>();
 
-    @OneToMany(mappedBy = "institute")
+    @OneToMany(mappedBy = "institute", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private List<FollowUp> followUps = new ArrayList<>();
 
     public Institute() {

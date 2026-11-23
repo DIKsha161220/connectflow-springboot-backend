@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +34,7 @@ public class CallLogController {
         this.ipAddressResolver = ipAddressResolver;
     }
 
-    @PostMapping({"/calls", "/call-logs"})
+    @PostMapping({"/calls", "/call-logs", "/call-log"})
     public ResponseEntity<ApiResponse<CallLogResponse>> create(
             @Valid @RequestBody CallLogRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor,
@@ -44,7 +45,7 @@ public class CallLogController {
                 .body(ApiResponse.success("Call recorded", response));
     }
 
-    @PutMapping({"/calls/{id}", "/call-logs/{id}"})
+    @PutMapping({"/calls/{id}", "/call-logs/{id}", "/call-log/{id}"})
     public ResponseEntity<ApiResponse<CallLogResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody CallLogRequest request,
@@ -52,6 +53,22 @@ public class CallLogController {
             HttpServletRequest servletRequest) {
         CallLogResponse response = callLogService.update(
                 id, request, actor, ipAddressResolver.from(servletRequest));
+        return ResponseEntity.ok(ApiResponse.success("Call updated", response));
+    }
+
+    @PutMapping({"/calls", "/call-logs", "/call-log"})
+    public ResponseEntity<ApiResponse<CallLogResponse>> updateWithoutId(
+            @Valid @RequestBody CallLogRequest request,
+            @AuthenticationPrincipal EmployeePrincipal actor,
+            HttpServletRequest servletRequest) {
+        List<CallLogResponse> all = callLogService.findAll(actor);
+        Long targetId = !all.isEmpty() ? all.get(0).callId() : null;
+        if (targetId == null) {
+            CallLogResponse created = callLogService.create(request, actor, ipAddressResolver.from(servletRequest));
+            return ResponseEntity.ok(ApiResponse.success("Call updated", created));
+        }
+        CallLogResponse response = callLogService.update(
+                targetId, request, actor, ipAddressResolver.from(servletRequest));
         return ResponseEntity.ok(ApiResponse.success("Call updated", response));
     }
 
@@ -63,7 +80,7 @@ public class CallLogController {
                 "Call retrieved", callLogService.findById(id, actor)));
     }
 
-    @GetMapping({"/calls", "/call-logs"})
+    @GetMapping({"/calls", "/call-logs", "/call-log"})
     public ResponseEntity<ApiResponse<List<CallLogResponse>>> findAll(
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -76,5 +93,23 @@ public class CallLogController {
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Call history retrieved", callLogService.findForInstitute(instituteId, actor)));
+    }
+
+    @DeleteMapping({"/calls/{id}", "/call-logs/{id}"})
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @PathVariable Long id,
+            @AuthenticationPrincipal EmployeePrincipal actor) {
+        callLogService.delete(id, actor);
+        return ResponseEntity.ok(ApiResponse.success("Call log deleted", null));
+    }
+
+    @DeleteMapping({"/calls", "/call-logs", "/call-log"})
+    public ResponseEntity<ApiResponse<Void>> deleteWithoutId(
+            @AuthenticationPrincipal EmployeePrincipal actor) {
+        List<CallLogResponse> all = callLogService.findAll(actor);
+        if (!all.isEmpty()) {
+            callLogService.delete(all.get(0).callId(), actor);
+        }
+        return ResponseEntity.ok(ApiResponse.success("Call log deleted", null));
     }
 }

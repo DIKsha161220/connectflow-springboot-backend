@@ -48,10 +48,11 @@ public class FollowUpController {
             @Valid @RequestBody FollowUpRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor,
             HttpServletRequest servletRequest) {
+        Long actorId = actor != null ? actor.getEmployeeId() : null;
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Follow-up created",
                 followUpService.create(
-                        request, actor.getEmployeeId(), ipAddressResolver.from(servletRequest))));
+                        request, actorId, ipAddressResolver.from(servletRequest))));
     }
 
     @PatchMapping("/{id}/complete")
@@ -59,9 +60,10 @@ public class FollowUpController {
             @PathVariable Long id,
             @AuthenticationPrincipal EmployeePrincipal actor,
             HttpServletRequest servletRequest) {
+        Long actorId = actor != null ? actor.getEmployeeId() : null;
         return ResponseEntity.ok(ApiResponse.success(
                 "Follow-up completed",
                 followUpService.complete(
-                        id, actor.getEmployeeId(), ipAddressResolver.from(servletRequest))));
+                        id, actorId, ipAddressResolver.from(servletRequest))));
     }
 }

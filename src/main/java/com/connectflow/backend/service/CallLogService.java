@@ -17,4 +17,6 @@ public interface CallLogService {
     List<CallLogResponse> findAll(EmployeePrincipal actor);
 
     List<CallLogResponse> findForInstitute(Long instituteId, EmployeePrincipal actor);
+
+    void delete(Long callId, EmployeePrincipal actor);
 }

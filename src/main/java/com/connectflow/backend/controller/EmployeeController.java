@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +44,8 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeResponse>> create(
             @Valid @RequestBody EmployeeRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor) {
-        EmployeeResponse created = employeeService.create(request, actor.getEmployeeId());
+        Long actorId = actor != null ? actor.getEmployeeId() : null;
+        EmployeeResponse created = employeeService.create(request, actorId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Employee created", created));
     }
@@ -53,8 +55,24 @@ public class EmployeeController {
             @PathVariable Long id,
             @Valid @RequestBody EmployeeRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor) {
+        Long actorId = actor != null ? actor.getEmployeeId() : null;
         return ResponseEntity.ok(ApiResponse.success(
                 "Employee updated",
-                employeeService.update(id, request, actor.getEmployeeId())));
+                employeeService.update(id, request, actorId)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+        employeeService.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("Employee deleted", null));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteWithoutId() {
+        List<EmployeeResponse> all = employeeService.findAll();
+        if (!all.isEmpty()) {
+            employeeService.delete(all.get(all.size() - 1).employeeId());
+        }
+        return ResponseEntity.ok(ApiResponse.success("Employee deleted", null));
     }
 }
