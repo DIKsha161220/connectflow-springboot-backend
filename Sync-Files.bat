@@ -1,8 +1,9 @@
 @echo off
 chcp 65001 >nul
 echo [ConnectFlow CRM] Synchronizing UI Files across all locations...
-copy /y "src\main\resources\static\index.html" "ConnectFlow-Desktop.html"
-copy /y "src\main\resources\static\index.html" "ConnectFlow-Desktop-App\app\index.html"
-copy /y "src\main\resources\static\index.html" "target\classes\static\index.html"
+copy /y "ConnectFlow-Desktop.html" "src\main\resources\static\index.html"
+copy /y "ConnectFlow-Desktop.html" "ConnectFlow-Desktop-App\ConnectFlow-Desktop.html"
+copy /y "ConnectFlow-Desktop.html" "ConnectFlow-Desktop-App\app\index.html"
+copy /y "ConnectFlow-Desktop.html" "target\classes\static\index.html"
 echo.
-echo [OK] All UI files synchronized with 1-Click Login header!
+echo [OK] All UI files synchronized with Real-time 2-Way Sync!

@@ -7,7 +7,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -19,7 +25,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/recordings")
@@ -111,8 +121,8 @@ public class AudioRecordingController {
         return ResponseEntity.ok(ApiResponse.success("Recordings retrieved", filesList));
     }
 
-    @GetMapping("/{filename:.+}")
-    public ResponseEntity<Resource> serveRecording(@PathVariable String filename) {
+    @GetMapping("/{filename}")
+    public ResponseEntity<Resource> serveRecording(@PathVariable("filename") String filename) {
         try {
             Path filePath = storageDirectory.resolve(filename).normalize();
             Resource resource = new UrlResource(filePath.toUri());
@@ -128,9 +138,9 @@ public class AudioRecordingController {
                 }
 
                 return ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(contentType))
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                        .body(resource);
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
             } else {
                 return ResponseEntity.notFound().build();
             }

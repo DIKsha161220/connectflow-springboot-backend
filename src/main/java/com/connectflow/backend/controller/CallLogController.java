@@ -47,8 +47,8 @@ public class CallLogController {
 
     @PutMapping({"/calls/{id}", "/call-logs/{id}", "/call-log/{id}"})
     public ResponseEntity<ApiResponse<CallLogResponse>> update(
-            @PathVariable Long id,
-            @Valid @RequestBody CallLogRequest request,
+            @PathVariable("id") Long id,
+            @RequestBody CallLogRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor,
             HttpServletRequest servletRequest) {
         CallLogResponse response = callLogService.update(
@@ -58,7 +58,7 @@ public class CallLogController {
 
     @PutMapping({"/calls", "/call-logs", "/call-log"})
     public ResponseEntity<ApiResponse<CallLogResponse>> updateWithoutId(
-            @Valid @RequestBody CallLogRequest request,
+            @RequestBody CallLogRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor,
             HttpServletRequest servletRequest) {
         List<CallLogResponse> all = callLogService.findAll(actor);
@@ -74,7 +74,7 @@ public class CallLogController {
 
     @GetMapping({"/calls/{id}", "/call-logs/{id}"})
     public ResponseEntity<ApiResponse<CallLogResponse>> findById(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Call retrieved", callLogService.findById(id, actor)));
@@ -89,7 +89,7 @@ public class CallLogController {
 
     @GetMapping("/institutes/{instituteId}/calls")
     public ResponseEntity<ApiResponse<List<CallLogResponse>>> findForInstitute(
-            @PathVariable Long instituteId,
+            @PathVariable("instituteId") Long instituteId,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Call history retrieved", callLogService.findForInstitute(instituteId, actor)));
@@ -97,7 +97,7 @@ public class CallLogController {
 
     @DeleteMapping({"/calls/{id}", "/call-logs/{id}"})
     public ResponseEntity<ApiResponse<Void>> delete(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         callLogService.delete(id, actor);
         return ResponseEntity.ok(ApiResponse.success("Call log deleted", null));

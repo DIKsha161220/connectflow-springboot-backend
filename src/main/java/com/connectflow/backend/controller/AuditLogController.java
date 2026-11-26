@@ -27,7 +27,7 @@ public class AuditLogController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<AuditLogResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<AuditLogResponse>> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.success("Audit log retrieved", auditLogService.findById(id)));
     }
 }

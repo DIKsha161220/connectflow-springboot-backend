@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -145,7 +147,7 @@ public class Visit {
         return updatedAt;
     }
 
-    @jakarta.persistence.PrePersist
+    @PrePersist
     void setTimestamps() {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         if (createdAt == null) {
@@ -154,7 +156,7 @@ public class Visit {
         updatedAt = now;
     }
 
-    @jakarta.persistence.PreUpdate
+    @PreUpdate
     void updateTimestamp() {
         updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }

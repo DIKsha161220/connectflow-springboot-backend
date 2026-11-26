@@ -15,13 +15,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/institutes")
 public class InstituteController {
 
     private final InstituteService instituteService;
@@ -30,22 +28,22 @@ public class InstituteController {
         this.instituteService = instituteService;
     }
 
-    @GetMapping
+    @GetMapping({"/api/institutes", "/api/institutes/"})
     public ResponseEntity<ApiResponse<List<InstituteResponse>>> findAll(
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Institutes retrieved", instituteService.findVisibleTo(actor)));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping({"/api/institutes/{id}", "/api/institutes{id:[0-9]+}"})
     public ResponseEntity<ApiResponse<InstituteResponse>> findById(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Institute retrieved", instituteService.findVisibleById(id, actor)));
     }
 
-    @PostMapping
+    @PostMapping({"/api/institutes", "/api/institutes/"})
     public ResponseEntity<ApiResponse<InstituteResponse>> create(
             @Valid @RequestBody InstituteRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor) {
@@ -53,24 +51,24 @@ public class InstituteController {
                 .body(ApiResponse.success("Institute created", instituteService.create(request, actor)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping({"/api/institutes/{id}", "/api/institutes{id:[0-9]+}"})
     public ResponseEntity<ApiResponse<InstituteResponse>> update(
-            @PathVariable Long id,
-            @Valid @RequestBody InstituteRequest request,
+            @PathVariable("id") Long id,
+            @RequestBody InstituteRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Institute updated", instituteService.update(id, request, actor)));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping({"/api/institutes/{id}", "/api/institutes{id:[0-9]+}"})
     public ResponseEntity<ApiResponse<Void>> delete(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         instituteService.delete(id, actor);
         return ResponseEntity.ok(ApiResponse.success("Institute deleted", null));
     }
 
-    @DeleteMapping
+    @DeleteMapping({"/api/institutes", "/api/institutes/"})
     public ResponseEntity<ApiResponse<Void>> deleteWithoutId(
             @AuthenticationPrincipal EmployeePrincipal actor) {
         List<InstituteResponse> all = instituteService.findVisibleTo(actor);

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/visits")
 public class VisitController {
 
     private final VisitService visitService;
@@ -37,7 +36,7 @@ public class VisitController {
         this.ipAddressResolver = ipAddressResolver;
     }
 
-    @PostMapping
+    @PostMapping({"/api/visits", "/api/visits/"})
     public ResponseEntity<ApiResponse<VisitResponse>> create(
             @Valid @RequestBody VisitRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor,
@@ -48,10 +47,10 @@ public class VisitController {
                 .body(ApiResponse.success("Visit created", response));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping({"/api/visits/{id}", "/api/visits{id:[0-9]+}"})
     public ResponseEntity<ApiResponse<VisitResponse>> update(
-            @PathVariable Long id,
-            @Valid @RequestBody VisitRequest request,
+            @PathVariable("id") Long id,
+            @RequestBody VisitRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor,
             HttpServletRequest servletRequest) {
         VisitResponse response = visitService.update(
@@ -59,15 +58,15 @@ public class VisitController {
         return ResponseEntity.ok(ApiResponse.success("Visit updated", response));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping({"/api/visits/{id}", "/api/visits{id:[0-9]+}"})
     public ResponseEntity<ApiResponse<VisitResponse>> findById(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Visit retrieved", visitService.findById(id, actor)));
     }
 
-    @GetMapping
+    @GetMapping({"/api/visits", "/api/visits/"})
     public ResponseEntity<ApiResponse<List<VisitResponse>>> findAll(
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -75,18 +74,28 @@ public class VisitController {
     }
 
     @RequestMapping(
-            value = {"/{id}/status", "/status"},
+            value = {"/api/visits/{id}/status", "/api/visits{id:[0-9]+}/status"},
             method = {RequestMethod.PATCH, RequestMethod.PUT})
     public ResponseEntity<ApiResponse<VisitResponse>> updateStatus(
-            @PathVariable(required = false) Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody VisitStatusRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor,
             HttpServletRequest servletRequest) {
-        Long targetId = id;
-        if (targetId == null) {
-            List<VisitResponse> all = visitService.findAll(actor);
-            if (!all.isEmpty()) targetId = all.get(0).visitId();
-        }
+        return ResponseEntity.ok(ApiResponse.success(
+                "Visit status updated",
+                visitService.updateStatus(
+                        id, request.status(), actor, ipAddressResolver.from(servletRequest))));
+    }
+
+    @RequestMapping(
+            value = {"/api/visits/status"},
+            method = {RequestMethod.PATCH, RequestMethod.PUT})
+    public ResponseEntity<ApiResponse<VisitResponse>> updateStatusDefault(
+            @Valid @RequestBody VisitStatusRequest request,
+            @AuthenticationPrincipal EmployeePrincipal actor,
+            HttpServletRequest servletRequest) {
+        List<VisitResponse> all = visitService.findAll(actor);
+        Long targetId = all.isEmpty() ? null : all.get(0).visitId();
         if (targetId == null) {
             throw new ResourceNotFoundException("Visit not found");
         }
@@ -96,21 +105,21 @@ public class VisitController {
                         targetId, request.status(), actor, ipAddressResolver.from(servletRequest))));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping({"/api/visits/{id}", "/api/visits{id:[0-9]+}"})
     public ResponseEntity<ApiResponse<Void>> delete(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         visitService.delete(id, actor);
-        return ResponseEntity.ok(ApiResponse.success("Visit deleted", null));
+        return ResponseEntity.ok(ApiResponse.success("Visit deleted"));
     }
 
-    @DeleteMapping
+    @DeleteMapping({"/api/visits", "/api/visits/"})
     public ResponseEntity<ApiResponse<Void>> deleteWithoutId(
             @AuthenticationPrincipal EmployeePrincipal actor) {
         List<VisitResponse> all = visitService.findAll(actor);
         if (!all.isEmpty()) {
             visitService.delete(all.get(0).visitId(), actor);
         }
-        return ResponseEntity.ok(ApiResponse.success("Visit deleted", null));
+        return ResponseEntity.ok(ApiResponse.success("Visit deleted"));
     }
 }

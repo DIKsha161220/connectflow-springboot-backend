@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class InstituteContactController {
 
     @GetMapping("/api/institutes/{instituteId}/contacts")
     public ResponseEntity<ApiResponse<List<InstituteContactResponse>>> findForInstitute(
-            @PathVariable Long instituteId,
+            @PathVariable("instituteId") Long instituteId,
             @AuthenticationPrincipal EmployeePrincipal actor) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Institute contacts retrieved",
@@ -46,18 +45,20 @@ public class InstituteContactController {
     public ResponseEntity<ApiResponse<InstituteContactResponse>> create(
             @Valid @RequestBody InstituteContactRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor) {
+        Long actorId = actor != null ? actor.getEmployeeId() : null;
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Contact created",
-                contactService.create(request, actor.getEmployeeId())));
+                contactService.create(request, actorId)));
     }
 
     @PutMapping("/api/institute-contacts/{id}")
     public ResponseEntity<ApiResponse<InstituteContactResponse>> update(
-            @PathVariable Long id,
-            @Valid @RequestBody InstituteContactRequest request,
+            @PathVariable("id") Long id,
+            @RequestBody InstituteContactRequest request,
             @AuthenticationPrincipal EmployeePrincipal actor) {
+        Long actorId = actor != null ? actor.getEmployeeId() : null;
         return ResponseEntity.ok(ApiResponse.success(
                 "Contact updated",
-                contactService.update(id, request, actor.getEmployeeId())));
+                contactService.update(id, request, actorId)));
     }
 }

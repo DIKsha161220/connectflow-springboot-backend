@@ -13,7 +13,7 @@ echo ======================================================================
 echo.
 
 :: Launch the Spring Boot backend in a dedicated background window
-start "ConnectFlow CRM Backend Service" cmd /k "cd /d "%~dp0" && mvnw.cmd spring-boot:run"
+start "ConnectFlow CRM Backend Service" cmd /k "cd /d "%~dp0" && call Start-Backend.bat"
 
 echo Backend initialization started in background window.
 echo Waiting 4 seconds for services to warm up...

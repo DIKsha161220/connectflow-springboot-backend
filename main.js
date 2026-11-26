@@ -28,7 +28,11 @@ function getJarPath() {
     if (isPackaged) {
         return path.join(process.resourcesPath, 'connectflow-backend-1.0.0.jar');
     }
-    return path.join(__dirname, 'target', 'connectflow-backend-1.0.0.jar');
+    const localJar = path.join(__dirname, 'target', 'connectflow-backend-1.0.0.jar');
+    if (require('fs').existsSync(localJar)) return localJar;
+    const parentJar = path.join(__dirname, '..', 'target', 'connectflow-backend-1.0.0.jar');
+    if (require('fs').existsSync(parentJar)) return parentJar;
+    return localJar;
 }
 
 // Start Spring Boot Backend in background
@@ -37,24 +41,48 @@ function startBackend() {
     const jarPath = getJarPath();
     const fs = require('fs');
 
-    if (!fs.existsSync(jarPath)) {
-        console.warn(`[ConnectFlow] Backend JAR not found at ${jarPath}. Loading local UI directly.`);
-        return null;
+    if (fs.existsSync(jarPath)) {
+        console.log(`[ConnectFlow] Spawning backend: ${javaExe} -jar ${jarPath}`);
+        const proc = spawn(javaExe, ['-jar', jarPath, `--server.port=${BACKEND_PORT}`], {
+            cwd: path.dirname(jarPath),
+            detached: false,
+            stdio: 'ignore',
+            windowsHide: true
+        });
+        proc.on('error', (err) => console.error('[ConnectFlow] Failed to start backend:', err));
+        return proc;
     }
 
-    console.log(`[ConnectFlow] Spawning backend: ${javaExe} -jar ${jarPath}`);
-    const proc = spawn(javaExe, ['-jar', jarPath, `--server.port=${BACKEND_PORT}`], {
-        cwd: path.dirname(jarPath),
-        detached: false,
-        stdio: 'ignore',
-        windowsHide: true
-    });
+    const rootDir = fs.existsSync(path.join(__dirname, 'mvnw.cmd')) ? __dirname : path.join(__dirname, '..');
+    const startBat = path.join(rootDir, 'Start-Backend.bat');
+    const mvnw = path.join(rootDir, 'mvnw.cmd');
 
-    proc.on('error', (err) => {
-        console.error('[ConnectFlow] Failed to start backend:', err);
-    });
+    if (fs.existsSync(startBat)) {
+        console.log(`[ConnectFlow] Spawning backend via Start-Backend.bat`);
+        const proc = spawn('cmd.exe', ['/c', startBat], {
+            cwd: rootDir,
+            detached: false,
+            stdio: 'ignore',
+            windowsHide: true
+        });
+        proc.on('error', (err) => console.error('[ConnectFlow] Failed to start backend via bat:', err));
+        return proc;
+    }
 
-    return proc;
+    if (fs.existsSync(mvnw)) {
+        console.log(`[ConnectFlow] Spawning backend via Maven wrapper: ${mvnw}`);
+        const proc = spawn('cmd.exe', ['/c', mvnw, 'spring-boot:run'], {
+            cwd: rootDir,
+            detached: false,
+            stdio: 'ignore',
+            windowsHide: true
+        });
+        proc.on('error', (err) => console.error('[ConnectFlow] Failed to start backend via mvnw:', err));
+        return proc;
+    }
+
+    console.warn(`[ConnectFlow] No backend found. Running offline UI.`);
+    return null;
 }
 
 // Check if Backend is responding

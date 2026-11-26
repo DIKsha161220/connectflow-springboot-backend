@@ -39,7 +39,7 @@ public class FollowUpController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<FollowUpResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<FollowUpResponse>> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.success("Follow-up retrieved", followUpService.findById(id)));
     }
 
@@ -57,7 +57,7 @@ public class FollowUpController {
 
     @PatchMapping("/{id}/complete")
     public ResponseEntity<ApiResponse<FollowUpResponse>> complete(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal EmployeePrincipal actor,
             HttpServletRequest servletRequest) {
         Long actorId = actor != null ? actor.getEmployeeId() : null;

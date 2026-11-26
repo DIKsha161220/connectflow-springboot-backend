@@ -54,6 +54,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public EmployeeResponse create(EmployeeRequest request, Long actorId) {
+        if (request.fullName() == null || request.fullName().isBlank()) {
+            throw new BadRequestException("Full name is required");
+        }
+        if (request.email() == null || request.email().isBlank()) {
+            throw new BadRequestException("Email is required");
+        }
+        if (request.roleId() == null) {
+            throw new BadRequestException("Role ID is required");
+        }
         if (request.password() == null || request.password().isBlank()) {
             throw new BadRequestException("A password is required when creating an employee");
         }
@@ -81,16 +90,25 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeResponse update(Long employeeId, EmployeeRequest request, Long actorId) {
         Employee actor = requireEmployee(actorId);
         Employee employee = requireEmployee(employeeId);
-        if (!employee.getEmail().equalsIgnoreCase(request.email())
-                && employeeRepository.existsByEmailIgnoreCase(request.email())) {
-            throw new BadRequestException("An employee with this email already exists");
+
+        if (request.email() != null && !request.email().isBlank()) {
+            if (!employee.getEmail().equalsIgnoreCase(request.email())
+                    && employeeRepository.existsByEmailIgnoreCase(request.email())) {
+                throw new BadRequestException("An employee with this email already exists");
+            }
+            employee.setEmail(request.email().trim().toLowerCase());
         }
 
         EmployeeResponse before = DtoMapper.employee(employee);
-        employee.setFullName(request.fullName().trim());
-        employee.setEmail(request.email().trim().toLowerCase());
-        employee.setPhone(request.phone());
-        employee.setRole(requireActiveRole(request.roleId()));
+        if (request.fullName() != null && !request.fullName().isBlank()) {
+            employee.setFullName(request.fullName().trim());
+        }
+        if (request.phone() != null) {
+            employee.setPhone(request.phone());
+        }
+        if (request.roleId() != null) {
+            employee.setRole(requireActiveRole(request.roleId()));
+        }
         if (request.active() != null) {
             employee.setActive(request.active());
         }
@@ -108,32 +126,23 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional
     public void delete(Long employeeId) {
         Employee employee = requireEmployee(employeeId);
-        if (employee != null) {
-            employee.setActive(false);
-            employeeRepository.save(employee);
-        }
+        employeeRepository.delete(employee);
     }
 
     private Employee requireEmployee(Long employeeId) {
-        if (employeeId != null) {
-            return employeeRepository.findById(employeeId)
-                    .orElseGet(() -> employeeRepository.findAll().stream().findFirst().orElse(null));
+        if (employeeId == null) {
+            return employeeRepository.findAll().stream().findFirst().orElse(null);
         }
-        return employeeRepository.findAll().stream().findFirst().orElse(null);
+        return employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
     }
 
     private Role requireActiveRole(Long roleId) {
         if (roleId == null) {
-            return roleRepository.findAll().stream()
-                    .filter(r -> Boolean.TRUE.equals(r.getActive()))
-                    .findFirst()
-                    .orElseThrow(() -> new ResourceNotFoundException("No active role found"));
+            return roleRepository.findAll().stream().filter(r -> Boolean.TRUE.equals(r.getActive())).findFirst().orElse(null);
         }
-        Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
-        if (!Boolean.TRUE.equals(role.getActive())) {
-            throw new BadRequestException("The selected role is inactive");
-        }
-        return role;
+        return roleRepository.findById(roleId)
+                .filter(Role::getActive)
+                .orElseThrow(() -> new BadRequestException("The selected role is inactive or not found"));
     }
 }

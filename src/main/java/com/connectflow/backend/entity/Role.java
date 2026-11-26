@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -51,12 +53,24 @@ public class Role {
         return roleName;
     }
 
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public Boolean getActive() {
         return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public OffsetDateTime getCreatedAt() {
@@ -67,7 +81,15 @@ public class Role {
         return updatedAt;
     }
 
-    @jakarta.persistence.PrePersist
+    public List<Employee> getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(List<Employee> employees) {
+        this.employees = employees;
+    }
+
+    @PrePersist
     void setTimestamps() {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         if (createdAt == null) {
@@ -76,7 +98,7 @@ public class Role {
         updatedAt = now;
     }
 
-    @jakarta.persistence.PreUpdate
+    @PreUpdate
     void updateTimestamp() {
         updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }
