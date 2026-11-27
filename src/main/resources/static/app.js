@@ -298,80 +298,195 @@ function setPage(page) {
   renderAll();
 }
 
-function openDialog(type) {
+function openDialog(type, prefill = {}) {
   const titleMap = {customer:"Add Institute", call:"Log a Call", visit:"Record Customer Visit", followup:"Schedule Follow-up"};
   if ($("dialog-title")) $("dialog-title").textContent = titleMap[type] || "Add Record";
-  if ($("dialog-fields")) $("dialog-fields").innerHTML = fieldsFor(type);
+  if ($("dialog-fields")) $("dialog-fields").innerHTML = fieldsFor(type, prefill);
   const dlg = $("record-dialog");
   if (dlg) {
     dlg.dataset.type = type;
-    dlg.showModal();
+    try {
+      if (dlg.open) dlg.close();
+      dlg.showModal();
+    } catch(e) {
+      dlg.setAttribute("open", "");
+    }
   }
 }
 
-function field(label, name, kind="text", opts=[], full=false, required=false, placeholder="") {
+function field(label, name, kind="text", opts=[], full=false, required=false, placeholder="", readonly=false, value="") {
   let control = "";
   if (kind === "select") {
-    control = `<select name="${name}" ${required?"required":""}>${opts.map(o=>`<option value="${escapeHtml(o.value??o)}">${escapeHtml(o.label??o)}</option>`).join("")}</select>`;
+    control = `<select name="${name}" ${required?"required":""}>${opts.map(o=>`<option value="${escapeHtml(o.value??o)}"${String(o.value??o)===String(value)?' selected':''}>${escapeHtml(o.label??o)}</option>`).join("")}</select>`;
   } else if (kind === "textarea") {
-    control = `<textarea name="${name}" placeholder="${escapeHtml(placeholder)}"></textarea>`;
+    control = `<textarea name="${name}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea>`;
   } else {
     const extraAttrs = name === "branchCount" ? ' min="1" step="1" inputmode="numeric"' : (name === "pin" ? ' maxlength="6" inputmode="numeric"' : "");
-    control = `<input name="${name}" type="${kind}"${extraAttrs} ${required?"required":""} placeholder="${escapeHtml(placeholder)}">`;
+    const roAttr = readonly ? ' readonly style="background:#f1f5f9; cursor:default; font-weight:700; color:#0f172a;"' : '';
+    control = `<input name="${name}" type="${kind}" value="${escapeHtml(value)}"${extraAttrs}${roAttr} ${required?"required":""} placeholder="${escapeHtml(placeholder)}">`;
   }
   return `<div class="form-field ${full?"full-width":""}"><label>${escapeHtml(label)}${required?" *":""}</label>${control}</div>`;
 }
 
-function fieldsFor(type) {
+function extractContactInfo(c) {
+  let name = "";
+  let phone = "";
+  if (c) {
+    if (c.contacts) {
+      const firstLine = String(c.contacts).split(/\r?\n/).filter(Boolean)[0];
+      if (firstLine) {
+        const parts = firstLine.split("|").map(p => p.trim());
+        name = parts[0] || "";
+        phone = parts[2] || "";
+      }
+    }
+    if (!phone && c.phone) phone = c.phone;
+  }
+  return { name, phone };
+}
+
+function fieldsFor(type, prefill = {}) {
   const customerNames = visibleCustomers().map(c => ({value: c.name, label: c.name}));
-  if (type === "customer") return [
-    field("Institute Name", "name", "text", [], true, true, "e.g. Modern College Pune"),
-    field("Street / Area", "street", "text", [], true, false, "e.g. Shivajinagar"),
-    field("Gaon / Village", "village", "text", [], false, false, "e.g. Shivajinagar"),
-    field("Taluka", "taluka", "text", [], false, false, "e.g. Haveli"),
-    field("District", "district", "text", [], false, false, "e.g. Pune"),
-    field("State", "state", "text", [], false, false, "e.g. Maharashtra"),
-    field("PIN Code", "pin", "text", [], false, false, "e.g. 411005 (6 digits)"),
-    field("Contact Person(s)", "contacts", "textarea", [], true, false, "Name | Position | Contact No.\nExample: Dr. Sanjay Kharat | Principal | 9822011223"),
-    field("Reference By", "referenceBy", "text", [], false, false, "e.g. Amit Patil"),
-    field("Reference From", "referenceFrom", "select", ["Select source","Employee","Existing Institute","Website","WhatsApp","Other"].map(x=>({value:x==="Select source"?"":x, label:x}))),
-    field("No. of Branches", "branchCount", "number", [], false, false, "e.g. 3"),
-    field("Priority", "priority", "select", priorityOptions.map(x=>({value:x,label:x}))),
-    field("Assigned Employee", "owner", "select", employeeOptions.map(x=>({value:x,label:x})), false, true),
-    field("Lead Status", "status", "select", statusOptions.map(x=>({value:x,label:x})), false, true),
-    field("Next Follow-up Date & Time", "followupDate", "datetime-local", [], true),
-    field("Notes", "notes", "textarea", [], true, false, "e.g. Interested in software demo; asked for quotation")
+  const now = new Date();
+  const nowStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const defaultFut = new Date(Date.now() + 3 * 86400000);
+  const defaultFutStr = new Date(defaultFut.getTime() - defaultFut.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+  if (type === "customer") {
+    const instOpts = [
+      { value: "", label: "-- Select Institute --" },
+      ...customerNames,
+      { value: "__custom__", label: "➕ Type / Add New Institute Name..." }
+    ];
+    if (prefill.name && !instOpts.some(o => o.value === prefill.name)) {
+      instOpts.splice(1, 0, { value: prefill.name, label: prefill.name });
+    }
+    const defaultFutForCust = new Date(Date.now() + 3 * 86400000);
+    defaultFutForCust.setHours(10, 0, 0, 0);
+    const defaultFutFormatted = defaultFutForCust.toLocaleDateString("en-IN", {day:"2-digit", month:"short", year:"numeric"}) + " · 10:00 AM";
+    const initialFollowup = prefill.followupDate || defaultFutFormatted;
+    return [
+      field("Institute Name", "name", "select", instOpts, true, true, "", false, prefill.name || ""),
+      `<div class="form-field full-width" id="custom-inst-name-field" style="display: none; margin-top: -4px; margin-bottom: 4px;">
+        <label style="font-size: 11.5px; color: #2563eb; font-weight: 600;">Type New Institute Name *</label>
+        <input type="text" name="customName" id="custom-institute-name-input" placeholder="e.g. Modern College Pune" style="width: 100%; border: 1.5px solid #3b82f6; border-radius: 6px; padding: 8px 10px; font-size: 13px; box-sizing: border-box;">
+      </div>`,
+      field("Street / Area", "street", "text", [], true, false, "e.g. Shivajinagar", false, prefill.street || ""),
+    field("Gaon / Village", "village", "text", [], false, false, "e.g. Shivajinagar", false, prefill.village || ""),
+    field("Taluka", "taluka", "text", [], false, false, "e.g. Haveli", false, prefill.taluka || ""),
+    field("District", "district", "text", [], false, false, "e.g. Pune", false, prefill.district || ""),
+    field("State", "state", "text", [], false, false, "e.g. Maharashtra", false, prefill.state || "Maharashtra"),
+    field("PIN Code", "pin", "text", [], false, false, "e.g. 411005 (6 digits)", false, prefill.pin || ""),
+    field("Contact Person(s)", "contacts", "textarea", [], true, false, "Name | Position | Contact No.\nExample: Dr. Sanjay Kharat | Principal | 9822011223", false, prefill.contacts || ""),
+    field("Reference By", "referenceBy", "text", [], false, false, "e.g. Amit Patil", false, prefill.referenceBy || ""),
+    field("Reference From", "referenceFrom", "select", ["Select source","Employee","Existing Institute","Website","WhatsApp","Other"].map(x=>({value:x==="Select source"?"":x, label:x})), false, false, "", false, prefill.referenceFrom || ""),
+    field("No. of Branches", "branchCount", "number", [], false, false, "e.g. 3", false, prefill.branchCount || ""),
+    field("Priority", "priority", "select", priorityOptions.map(x=>({value:x,label:x})), false, false, "", false, prefill.priority || "High"),
+    field("Assigned Employee", "owner", "select", employeeOptions.map(x=>({value:x,label:x})), false, true, "", false, prefill.owner || "Amit Patil"),
+    field("Lead Status", "status", "select", statusOptions.map(x=>({value:x,label:x})), false, true, "", false, prefill.status || "New"),
+    field("Next Follow-up Date & Time", "followupDate", "text", [], true, false, "e.g. 30 Nov 2026 · 10:00 AM or Next Monday", false, initialFollowup),
+    field("Notes", "notes", "textarea", [], true, false, "e.g. Interested in software demo; asked for quotation", false, prefill.notes || "")
   ].join("");
 
-  if (type === "call") return [
-    field("Institute", "customer", "select", customerNames, true, true),
-    field("Call type", "callType", "select", ["Outgoing","Incoming"].map(x=>({value:x,label:x}))),
-    field("Call date & time", "activityDate", "datetime-local", [], false, true),
-    field("Employee who called", "owner", "select", employeeOptions.map(x=>({value:x,label:x})), false, true),
-    field("Contact person called", "contactPerson", "text", [], false, false, "e.g. Dr. Sanjay Kharat"),
-    field("Contact number", "contactPhone", "tel", [], false, false, "e.g. 9822011223"),
-    field("Call outcome", "result", "select", callResults.map(x=>({value:x,label:x})), false, true),
-    field("Next follow-up date & time", "followupDate", "datetime-local"),
-    field("Call notes", "notes", "textarea", [], true, false, "What was discussed? What happens next?")
-  ].join("");
+  if (type === "call") {
+    const custVal = prefill.customer || (customerNames[0]?.value || "");
+    return [
+      field("Institute", "customer", "text", [], true, true, "Institute Name", false, custVal),
+      field("Call type", "callType", "select", ["Outgoing","Incoming"].map(x=>({value:x,label:x})), false, false, "", false, prefill.callType || "Outgoing"),
+      field("Call date & time", "activityDate", "datetime-local", [], false, true, "", false, prefill.activityDate || nowStr),
+      field("Employee who called", "owner", "select", employeeOptions.map(x=>({value:x,label:x})), false, true, "", false, prefill.owner || "Amit Patil"),
+      field("Contact person called", "contactPerson", "text", [], false, false, "e.g. Dr. Sanjay Kharat", false, prefill.contactPerson || ""),
+      field("Contact number", "contactPhone", "tel", [], false, false, "e.g. 9822011223", false, prefill.contactPhone || ""),
+      field("Call outcome", "result", "select", callResults.map(x=>({value:x,label:x})), false, true, "", false, prefill.result || "Interested"),
+      field("Next follow-up date & time", "followupDate", "datetime-local", [], false, false, "", false, prefill.followupDate || defaultFutStr),
+      field("Call notes", "notes", "textarea", [], true, false, "What was discussed? What happens next?", false, prefill.notes || "")
+    ].join("");
+  }
 
-  if (type === "visit") return [
-    field("Institute / company", "customer", "select", customerNames, true, true),
-    field("Visit date & time", "activityDate", "datetime-local", [], false, true),
-    field("Contact person met", "contactPerson", "text", [], false, false, "e.g. Dr. Sanjay Kharat"),
-    field("Contact number", "contactPhone", "tel", [], false, false, "e.g. 9822011223"),
-    field("Assigned employee", "owner", "select", employeeOptions.map(x=>({value:x,label:x}))),
-    field("Visit status", "status", "select", visitStatuses.map(x=>({value:x,label:x}))),
-    field("Purpose", "purpose", "text", [], true, false, "Purpose of visit"),
-    field("Visit notes", "notes", "textarea", [], true, false, "Visit outcome and next steps")
-  ].join("");
+  if (type === "visit") {
+    const custVal = prefill.customer || (customerNames[0]?.value || "");
+    const selCust = customerByName(custVal);
+    const contact = extractContactInfo(selCust);
+    const cpVal = prefill.contactPerson || contact.name || "";
+    const phoneVal = prefill.contactPhone || contact.phone || selCust?.phone || "";
+    return [
+      field("Institute", "customer", "select", customerNames, true, true, "", false, custVal),
+      field("Visit date & time", "activityDate", "datetime-local", [], false, true, "", false, prefill.activityDate || nowStr),
+      field("Contact person met", "contactPerson", "text", [], false, false, "e.g. Dr. Sanjay Kharat", false, cpVal),
+      field("Contact number", "contactPhone", "tel", [], false, false, "e.g. 9822011223", false, phoneVal),
+      field("Assigned employee", "owner", "select", employeeOptions.map(x=>({value:x,label:x})), false, false, "", false, prefill.owner || "Amit Patil"),
+      field("Visit status", "status", "select", visitStatuses.map(x=>({value:x,label:x})), false, false, "", false, prefill.status || "Scheduled"),
+      field("Purpose", "purpose", "text", [], true, false, "Purpose of visit", false, prefill.purpose || "Customer visit"),
+      field("Visit notes", "notes", "textarea", [], true, false, "Visit outcome and next steps", false, prefill.notes || "")
+    ].join("");
+  }
 
+  const custVal = prefill.customer || (customerNames[0]?.value || "");
   return [
-    field("Institute", "customer", "select", customerNames, true, true),
-    field("Follow-up date & time", "date", "datetime-local", [], true, true),
-    field("Assigned employee", "owner", "select", employeeOptions.map(x=>({value:x,label:x}))),
-    field("Notes", "notes", "textarea", [], true, false, "What needs to be discussed?")
+    field("Institute", "customer", "select", customerNames, true, true, "", false, custVal),
+    field("Follow-up date & time", "date", "datetime-local", [], true, true, "", false, prefill.date || defaultFutStr),
+    field("Assigned employee", "owner", "select", employeeOptions.map(x=>({value:x,label:x})), false, false, "", false, prefill.owner || "Amit Patil"),
+    field("Notes", "notes", "textarea", [], true, false, "What needs to be discussed?", false, prefill.notes || "")
   ].join("");
+}
+
+function openLogCallForCustomer(cOrName) {
+  const c = typeof cOrName === "object" ? cOrName : (customerByName(cOrName) || { name: cOrName });
+  const contact = extractContactInfo(c);
+  const now = new Date();
+  const nowStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  let futStr = "";
+  if (c && c.followupDate) {
+    futStr = c.followupDate.slice(0, 16);
+  } else {
+    const fut = new Date(Date.now() + 3 * 86400000);
+    futStr = new Date(fut.getTime() - fut.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  }
+  openDialog("call", {
+    customer: c?.name || "",
+    callType: "Outgoing",
+    activityDate: nowStr,
+    owner: c?.owner || "Amit Patil",
+    contactPerson: contact.name || "Principal / Administrator",
+    contactPhone: contact.phone || c?.phone || "9822011223",
+    result: "Interested",
+    followupDate: futStr,
+    notes: c?.notes ? `${c.notes} — Call discussion.` : `Discussion with ${c?.name || 'institute'} regarding software demonstration.`
+  });
+}
+
+function openLogVisitForCustomer(cOrName) {
+  const c = typeof cOrName === "object" ? cOrName : (customerByName(cOrName) || { name: cOrName });
+  const contact = extractContactInfo(c);
+  const now = new Date();
+  const nowStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  openDialog("visit", {
+    customer: c?.name || "",
+    activityDate: nowStr,
+    contactPerson: contact.name || "Principal / Administrator",
+    contactPhone: contact.phone || c?.phone || "9822011223",
+    owner: c?.owner || "Amit Patil",
+    status: "Scheduled",
+    purpose: "On-site Campus Visit & Product Demonstration",
+    notes: c?.notes ? `${c.notes} — Campus meeting planned.` : `Scheduled physical meeting at ${c?.name || 'campus'}. Executive carrying demo credentials.`
+  });
+}
+
+function openScheduleFollowupForCustomer(cOrName) {
+  const c = typeof cOrName === "object" ? cOrName : (customerByName(cOrName) || { name: cOrName });
+  let dtStr = "";
+  if (c && c.followupDate) {
+    dtStr = c.followupDate.slice(0, 16);
+  } else {
+    const fut = new Date(Date.now() + 2 * 86400000);
+    dtStr = new Date(fut.getTime() - fut.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  }
+  openDialog("followup", {
+    customer: c?.name || "",
+    date: dtStr,
+    owner: c?.owner || "Amit Patil",
+    notes: c?.notes ? `${c.notes} — Follow-up required.` : `Scheduled follow-up discussion for ${c?.name || 'institute'}. Review quotation and next steps.`
+  });
 }
 
 function customerByName(name) { return state.customers.find(c => c.name === name); }
@@ -911,7 +1026,18 @@ window.addEventListener("DOMContentLoaded", () => {
   const primBtn = $("primary-action");
   if (primBtn) {
     primBtn.addEventListener("click", () => {
-      openDialog(({dashboard:"customer", customers:"customer", calls:"call", visits:"visit", followups:"followup"})[state.page] || "customer");
+      const curType = ({dashboard:"customer", customers:"customer", calls:"call", visits:"visit", followups:"followup"})[state.page] || "customer";
+      if (curType === "call") {
+        const c = visibleCustomers()[0];
+        if (c) { openLogCallForCustomer(c); return; }
+      } else if (curType === "visit") {
+        const c = visibleCustomers()[0];
+        if (c) { openLogVisitForCustomer(c); return; }
+      } else if (curType === "followup") {
+        const c = visibleCustomers()[0];
+        if (c) { openScheduleFollowupForCustomer(c); return; }
+      }
+      openDialog(curType);
     });
   }
 
@@ -967,18 +1093,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (detailCall) {
       const name = detailCall.dataset.detailCall;
       $("institute-detail-dialog").close();
-      openDialog("call");
-      const f = $("dialog-fields");
-      if (f) {
-        if (f.querySelector('[name="customer"]')) f.querySelector('[name="customer"]').value = name;
-        const c = customerByName(name);
-        if (c) {
-          const parts = (c.contacts||"").split("\n")[0].split("|").map(x => x.trim());
-          if (f.querySelector('[name="contactPerson"]')) f.querySelector('[name="contactPerson"]').value = parts[0] || "";
-          if (f.querySelector('[name="contactPhone"]')) f.querySelector('[name="contactPhone"]').value = parts[2] || c.phone || "";
-          if (f.querySelector('[name="owner"]')) f.querySelector('[name="owner"]').value = c.owner || activeRole().user;
-        }
-      }
+      openLogCallForCustomer(name);
       return;
     }
 
@@ -986,27 +1101,14 @@ window.addEventListener("DOMContentLoaded", () => {
     if (detailVisit) {
       const name = detailVisit.dataset.detailVisit;
       $("institute-detail-dialog").close();
-      openDialog("visit");
-      const f = $("dialog-fields");
-      if (f) {
-        if (f.querySelector('[name="customer"]')) f.querySelector('[name="customer"]').value = name;
-        const c = customerByName(name);
-        if (c) {
-          const parts = (c.contacts||"").split("\n")[0].split("|").map(x => x.trim());
-          if (f.querySelector('[name="contactPerson"]')) f.querySelector('[name="contactPerson"]').value = parts[0] || "";
-          if (f.querySelector('[name="contactPhone"]')) f.querySelector('[name="contactPhone"]').value = parts[2] || c.phone || "";
-          if (f.querySelector('[name="owner"]')) f.querySelector('[name="owner"]').value = c.owner || activeRole().user;
-        }
-      }
+      openLogVisitForCustomer(name);
       return;
     }
 
     const log = e.target.closest("[data-log-customer]");
     if (log) {
       setPage("calls");
-      openDialog("call");
-      const select = $('dialog-fields')?.querySelector('[name="customer"]');
-      if (select) select.value = log.dataset.logCustomer;
+      openLogCallForCustomer(log.dataset.logCustomer);
       return;
     }
 
@@ -1034,14 +1136,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (reschedule) {
       const f = state.followups.find(x => x.id === Number(reschedule.dataset.rescheduleFollowup));
       if (!f) return;
-      openDialog("followup");
-      const fields = $("dialog-fields");
-      if (fields) {
-        if (fields.querySelector('[name="customer"]')) fields.querySelector('[name="customer"]').value = f.customer;
-        if (fields.querySelector('[name="owner"]')) fields.querySelector('[name="owner"]').value = f.owner;
-        if (fields.querySelector('[name="date"]')) fields.querySelector('[name="date"]').value = f.date;
-        if (fields.querySelector('[name="notes"]')) fields.querySelector('[name="notes"]').value = f.notes || "";
-      }
+      openScheduleFollowupForCustomer(f.customer);
       state.followups = state.followups.filter(x => x.id !== f.id);
       saveLocalState();
       return;
@@ -1050,9 +1145,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const logFollowup = e.target.closest("[data-followup-call]");
     if (logFollowup) {
       setPage("calls");
-      openDialog("call");
-      const select = $('dialog-fields')?.querySelector('[name="customer"]');
-      if (select) select.value = logFollowup.dataset.followupCall;
+      openLogCallForCustomer(logFollowup.dataset.followupCall);
       return;
     }
   });
